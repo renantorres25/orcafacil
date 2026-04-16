@@ -9,13 +9,17 @@ function DashboardContent() {
   const linkGerado = orcamentoId ? `${window.location.origin}/orcamento/${orcamentoId}` : null
 
   function copiarLink() {
-    navigator.clipboard.writeText(linkGerado)
-    alert('Link copiado!')
+    if (linkGerado) {
+      navigator.clipboard.writeText(linkGerado)
+      alert('Link copiado!')
+    }
   }
 
   function enviarWhatsApp() {
-    const msg = `Olá! Segue o link do seu orçamento: ${linkGerado}`
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`)
+    if (linkGerado) {
+      const msg = `Olá! Segue o link do seu orçamento: ${linkGerado}`
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`)
+    }
   }
 
   return (
