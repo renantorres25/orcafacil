@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../supernase'
+import { supabase } from '../superbase'
 
 interface Item {
   descricao: string
