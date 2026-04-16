@@ -26,6 +26,9 @@ export default function PaginaOrcamento({ params }) {
   async function aprovar() {
     await supabase.from('orcamentos').update({ status: 'aprovado' }).eq('id', id)
     setResposta('aprovado')
+    const mensagem = `✅ Orçamento APROVADO!\n\nCliente: ${orcamento.cliente}\nTotal: R$ ${parseFloat(orcamento.total).toFixed(2).replace('.', ',')}`
+    const url = `https://wa.me/5517991630883?text=${encodeURIComponent(mensagem)}`
+    window.open(url, '_blank')
   }
 
   async function recusar() {
@@ -66,20 +69,20 @@ export default function PaginaOrcamento({ params }) {
           </div>
         </div>
 
-       {resposta === '' && orcamento.status === 'pendente' && (
-  <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-    <button 
-      onClick={aprovar}
-      style={{backgroundColor: '#16a34a', color: 'white', width: '100%', padding: '16px', borderRadius: '12px', fontSize: '18px', fontWeight: '600', border: 'none', cursor: 'pointer'}}>
-      ✓ Aprovar orçamento
-    </button>
-    <button 
-      onClick={recusar}
-      style={{backgroundColor: 'white', color: '#ef4444', width: '100%', padding: '16px', borderRadius: '12px', fontSize: '16px', fontWeight: '600', border: '1px solid #fca5a5', cursor: 'pointer'}}>
-      Recusar
-    </button>
-  </div>
-)}
+        {resposta === '' && orcamento.status === 'pendente' && (
+          <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+            <button
+              onClick={aprovar}
+              style={{backgroundColor: '#16a34a', color: 'white', width: '100%', padding: '16px', borderRadius: '12px', fontSize: '18px', fontWeight: '600', border: 'none', cursor: 'pointer'}}>
+              ✓ Aprovar orçamento
+            </button>
+            <button
+              onClick={recusar}
+              style={{backgroundColor: 'white', color: '#ef4444', width: '100%', padding: '16px', borderRadius: '12px', fontSize: '16px', fontWeight: '600', border: '1px solid #fca5a5', cursor: 'pointer'}}>
+              Recusar
+            </button>
+          </div>
+        )}
 
         {(resposta === 'aprovado' || orcamento.status === 'aprovado') && (
           <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
