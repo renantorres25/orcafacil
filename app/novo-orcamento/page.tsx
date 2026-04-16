@@ -42,12 +42,7 @@ export default function NovoOrcamento() {
 
     const { data, error } = await supabase
       .from('orcamentos')
-      .insert({
-        cliente,
-        telefone,
-        itens,
-        total
-      })
+      .insert({ cliente, telefone, itens, total })
       .select()
 
     if (error) {
@@ -57,13 +52,12 @@ export default function NovoOrcamento() {
     }
 
     const id = data[0].id
-    router.push(`/orcamento/${id}`)
+    router.push(`/dashboard?orcamento=${id}`)
   }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto">
-
         <div className="flex items-center gap-4 mb-8">
           <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600">
             ← Voltar
@@ -143,7 +137,6 @@ export default function NovoOrcamento() {
         >
           {salvando ? 'Salvando...' : 'Gerar link do orçamento'}
         </button>
-
       </div>
     </div>
   )

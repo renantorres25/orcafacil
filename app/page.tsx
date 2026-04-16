@@ -1,8 +1,10 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from './supernase'
 
 export default function Home() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [mensagem, setMensagem] = useState('')
@@ -13,10 +15,10 @@ export default function Home() {
     const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
     if (error) {
       setMensagem('E-mail ou senha incorretos.')
+      setCarregando(false)
     } else {
-      setMensagem('Login realizado com sucesso!')
+      router.push('/dashboard')
     }
-    setCarregando(false)
   }
 
   async function cadastrar() {
@@ -24,10 +26,11 @@ export default function Home() {
     const { error } = await supabase.auth.signUp({ email, password: senha })
     if (error) {
       setMensagem('Erro ao cadastrar: ' + error.message)
+      setCarregando(false)
     } else {
       setMensagem('Cadastro realizado! Verifique seu e-mail.')
+      setCarregando(false)
     }
-    setCarregando(false)
   }
 
   return (
