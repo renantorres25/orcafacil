@@ -3,24 +3,29 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../supernase'
 
+interface Item {
+  descricao: string
+  valor: string
+}
+
 export default function NovoOrcamento() {
   const router = useRouter()
   const [cliente, setCliente] = useState('')
   const [telefone, setTelefone] = useState('')
-  const [itens, setItens] = useState([{ descricao: '', valor: '' }])
+  const [itens, setItens] = useState<Item[]>([{ descricao: '', valor: '' }])
   const [salvando, setSalvando] = useState(false)
 
   function adicionarItem() {
     setItens([...itens, { descricao: '', valor: '' }])
   }
 
-  function removerItem(index) {
+  function removerItem(index: number) {
     setItens(itens.filter((_, i) => i !== index))
   }
 
-  function atualizarItem(index, campo, valor) {
+  function atualizarItem(index: number, campo: string, valor: string) {
     const novosItens = [...itens]
-    novosItens[index][campo] = valor
+    novosItens[index] = { ...novosItens[index], [campo]: valor }
     setItens(novosItens)
   }
 
