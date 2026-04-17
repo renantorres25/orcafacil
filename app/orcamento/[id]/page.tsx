@@ -1,345 +1,291 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
-import { supabase } from '../superbase'
+import { supabase } from '../../superbase'
+import { use } from 'react'
 
-function DashboardContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const orcamentoId = searchParams.get('orcamento')
-  const linkGerado = orcamentoId ? `${typeof window !== 'undefined' ? window.location.origin : ''}/orcamento/${orcamentoId}` : null
-  const [orcamentos, setOrcamentos] = useState([])
+export default function PaginaOrcamento({ params }) {
+  const { id } = use(params)
+  const [orcamento, setOrcamento] = useState(null)
   const [carregando, setCarregando] = useState(true)
-  const [usuario, setUsuario] = useState(null)
-  const [mostrarLink, setMostrarLink] = useState(!!orcamentoId)
-  const [copiado, setCopiado] = useState(false)
-
-  async function carregarOrcamentos(user) {
-    const { data } = await supabase
-      .from('orcamentos')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-    setOrcamentos(data || [])
-  }
+  const [resposta, setResposta] = useState('')
 
   useEffect(() => {
-    async function carregar() {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUsuario(user)
-      if (user) {
-        await carregarOrcamentos(user)
-      }
+    async function buscarOrcamento() {
+      const { data, error } = await supabase
+        .from('orcamentos')
+        .select('*')
+        .eq('id', id)
+        .single()
+      setOrcamento(data)
       setCarregando(false)
     }
-    carregar()
-  }, [])
+    buscarOrcamento()
+  }, [id])
 
-  // Atualização automática a cada 30 segundos
-  useEffect(() => {
-    if (!usuario) return
-    const interval = setInterval(() => {
-      carregarOrcamentos(usuario)
-    }, 30000)
-    return () => clearInterval(interval)
-  }, [usuario])
-
-  // Esconder mensagem de link após 10 segundos
-  useEffect(() => {
-    if (mostrarLink) {
-      const timer = setTimeout(() => {
-        setMostrarLink(false)
-        router.replace('/dashboard')
-      }, 10000)
-      return () => clearTimeout(timer)
-    }
-  }, [mostrarLink])
-
-  const total = orcamentos.length
-  const aprovados = orcamentos.filter(o => o.status === 'aprovado').length
-  const pendentes = orcamentos.filter(o => o.status === 'pendente').length
-  const valorAberto = orcamentos
-    .filter(o => o.status === 'pendente')
-    .reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
-
-  function copiarLink() {
-    if (linkGerado) {
-      navigator.clipboard.writeText(linkGerado)
-      setCopiado(true)
-      setTimeout(() => setCopiado(false), 2000)
-    }
+  async function aprovar() {
+    await supabase.from('orcamentos').update({ status: 'aprovado' }).eq('id', id)
+    setResposta('aprovado')
+    const mensagem = `✅ Orçamento APROVADO!\n\nCliente: ${orcamento.cliente}\nTotal: R$ ${parseFloat(orcamento.total).toFixed(2).replace('.', ',')}`
+    const url = `https://wa.me/5517991630883?text=${encodeURIComponent(mensagem)}`
+    window.open(url, '_blank')
   }
 
-  function enviarWhatsApp() {
-    if (linkGerado) {
-      const msg = `Olá! Segue o link do seu orçamento: ${linkGerado}`
-      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`)
-    }
+  async function recusar() {
+    await supabase.from('orcamentos').update({ status: 'recusado' }).eq('id', id)
+    setResposta('recusado')
   }
 
-  async function sair() {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
+  if (carregando) return (
+    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'DM Sans', sans-serif" }}>
+      <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+        <div style={{ fontSize: '32px', marginBottom: '12px' }}>⏳</div>
+        <p>Carregando orçamento...</p>
+      </div>
+    </div>
+  )
 
-  function getStatusColor(status) {
-    if (status === 'aprovado') return { bg: 'rgba(16,185,129,0.15)', text: '#34d399', label: 'Aprovado' }
-    if (status === 'recusado') return { bg: 'rgba(239,68,68,0.15)', text: '#f87171', label: 'Recusado' }
-    return { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Pendente' }
-  }
+  if (!orcamento) return (
+    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'DM Sans', sans-serif" }}>
+      <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+        <div style={{ fontSize: '32px', marginBottom: '12px' }}>❌</div>
+        <p>Orçamento não encontrado.</p>
+      </div>
+    </div>
+  )
 
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#0f1117',
+      background: 'linear-gradient(135deg, #f0f4ff 0%, #fafafa 50%, #f5f0ff 100%)',
       fontFamily: "'DM Sans', sans-serif",
-      color: '#f1f5f9'
+      padding: '32px 16px'
     }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 
-      {/* Sidebar */}
-      <div style={{
-        position: 'fixed',
-        left: 0, top: 0, bottom: 0,
-        width: '240px',
-        background: '#16181f',
-        borderRight: '1px solid #1e2130',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '24px 16px',
-        zIndex: 10
-      }}>
-        <div style={{ marginBottom: '40px', padding: '0 8px' }}>
+      <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'white',
+            border: '1px solid #e2e8f0',
+            borderRadius: '100px',
+            padding: '8px 20px',
+            marginBottom: '16px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+          }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: '#10b981'
+            }}></div>
+            <span style={{ fontSize: '12px', color: '#6b7280', letterSpacing: '0.5px', fontWeight: 500 }}>ORÇAMENTO PROFISSIONAL</span>
+          </div>
+          <h1 style={{
             fontFamily: "'Syne', sans-serif",
-            fontSize: '22px',
+            fontSize: '28px',
             fontWeight: 800,
+            margin: '0 0 4px',
             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-          }}>OrcaFácil</div>
-          <div style={{ fontSize: '11px', color: '#4b5563', marginTop: '2px', letterSpacing: '0.5px' }}>PAINEL PROFISSIONAL</div>
+          }}>OrcaFácil</h1>
+          <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Orçamento enviado com segurança</p>
         </div>
 
-        <nav style={{ flex: 1 }}>
-          {[
-            { icon: '▦', label: 'Dashboard', active: true },
-            { icon: '◈', label: 'Orçamentos', active: false },
-            { icon: '◉', label: 'Clientes', active: false },
-            { icon: '◎', label: 'Relatórios', active: false },
-          ].map((item) => (
-            <div key={item.label} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '10px 12px',
-              borderRadius: '10px',
-              marginBottom: '4px',
-              background: item.active ? 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1))' : 'transparent',
-              border: item.active ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',
-              color: item.active ? '#a5b4fc' : '#6b7280',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: item.active ? 600 : 400,
-            }}>
-              <span style={{ fontSize: '16px' }}>{item.icon}</span>
-              {item.label}
-            </div>
-          ))}
-        </nav>
-
-        <div style={{ padding: '12px', borderRadius: '12px', background: '#1e2130', border: '1px solid #2a2d3e' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Conta</div>
-          <div style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {usuario?.email || '...'}
-          </div>
-          <button onClick={sair} style={{
-            width: '100%', padding: '8px',
-            background: 'transparent',
-            border: '1px solid #374151',
-            borderRadius: '8px',
-            color: '#6b7280',
-            fontSize: '13px',
-            cursor: 'pointer',
-            fontFamily: "'DM Sans', sans-serif"
-          }}>Sair</button>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div style={{ marginLeft: '240px', padding: '32px 40px' }}>
-
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
-          <div>
-            <h1 style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: '28px', fontWeight: 800,
-              color: '#f1f5f9', margin: 0,
-            }}>Bem-vindo de volta 👋</h1>
-            <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>
-              Gerencie seus orçamentos com facilidade
-            </p>
-          </div>
-          <button onClick={() => router.push('/novo-orcamento')} style={{
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            color: 'white', border: 'none',
-            padding: '12px 24px', borderRadius: '12px',
-            fontSize: '14px', fontWeight: 600, cursor: 'pointer',
-            boxShadow: '0 4px 24px rgba(99,102,241,0.4)',
-            fontFamily: "'DM Sans', sans-serif"
-          }}>+ Novo orçamento</button>
-        </div>
-
-        {/* Link gerado — some após 10s */}
-        {mostrarLink && linkGerado && (
+        {/* Card principal */}
+        <div style={{
+          background: 'white',
+          borderRadius: '24px',
+          boxShadow: '0 4px 32px rgba(0,0,0,0.08)',
+          overflow: 'hidden',
+          marginBottom: '16px'
+        }}>
+          {/* Faixa superior */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))',
-            border: '1px solid rgba(16,185,129,0.3)',
-            borderRadius: '16px',
-            padding: '24px',
-            marginBottom: '32px',
-            position: 'relative'
+            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+            padding: '20px 24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}>
-            <button onClick={() => { setMostrarLink(false); router.replace('/dashboard') }} style={{
-              position: 'absolute', top: '12px', right: '16px',
-              background: 'transparent', border: 'none',
-              color: '#6b7280', fontSize: '20px', cursor: 'pointer'
-            }}>×</button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '20px' }}>✅</span>
-              <span style={{ color: '#34d399', fontWeight: 600, fontSize: '16px' }}>Orçamento criado com sucesso!</span>
+            <div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>Cliente</div>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: 'white', fontFamily: "'Syne', sans-serif" }}>{orcamento.cliente}</div>
             </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>Total</div>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: 'white', fontFamily: "'Syne', sans-serif" }}>
+                R$ {parseFloat(orcamento.total).toFixed(2).replace('.', ',')}
+              </div>
+            </div>
+          </div>
+
+          {/* Itens */}
+          <div style={{ padding: '24px' }}>
+            {orcamento.telefone && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '20px',
+                padding: '10px 14px',
+                background: '#f8fafc',
+                borderRadius: '10px',
+                fontSize: '13px',
+                color: '#64748b'
+              }}>
+                <span>📱</span>
+                <span>{orcamento.telefone}</span>
+              </div>
+            )}
+
+            <div style={{ fontSize: '12px', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: '12px', fontWeight: 600 }}>
+              Serviços inclusos
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+              {orcamento.itens.map((item, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px 16px',
+                  background: '#f8fafc',
+                  borderRadius: '12px',
+                  border: '1px solid #f1f5f9'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '8px',
+                      background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      color: 'white',
+                      fontWeight: 700,
+                      flexShrink: 0
+                    }}>{index + 1}</div>
+                    <span style={{ fontSize: '14px', color: '#374151', fontWeight: 500 }}>{item.descricao}</span>
+                  </div>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#1e293b' }}>
+                    R$ {parseFloat(item.valor).toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Total */}
             <div style={{
-              background: 'rgba(0,0,0,0.3)', borderRadius: '10px',
-              padding: '12px 16px', fontSize: '13px', color: '#9ca3af',
-              wordBreak: 'break-all', marginBottom: '16px', border: '1px solid #1e2130'
-            }}>{linkGerado}</div>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={copiarLink} style={{
-                background: copiado ? '#047857' : '#059669',
-                color: 'white', border: 'none',
-                padding: '10px 20px', borderRadius: '10px',
-                fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                fontFamily: "'DM Sans', sans-serif"
-              }}>{copiado ? '✓ Copiado!' : 'Copiar link'}</button>
-              <button onClick={enviarWhatsApp} style={{
-                background: '#16a34a', color: 'white', border: 'none',
-                padding: '10px 20px', borderRadius: '10px',
-                fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                fontFamily: "'DM Sans', sans-serif"
-              }}>📲 Enviar pelo WhatsApp</button>
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '16px',
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.04))',
+              borderRadius: '14px',
+              border: '1px solid rgba(99,102,241,0.15)'
+            }}>
+              <span style={{ fontSize: '15px', fontWeight: 600, color: '#374151' }}>Total do orçamento</span>
+              <span style={{
+                fontSize: '22px',
+                fontWeight: 800,
+                fontFamily: "'Syne', sans-serif",
+                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                R$ {parseFloat(orcamento.total).toFixed(2).replace('.', ',')}
+              </span>
             </div>
+          </div>
+        </div>
+
+        {/* Botões de ação */}
+        {resposta === '' && orcamento.status === 'pendente' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button onClick={aprovar} style={{
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              color: 'white',
+              border: 'none',
+              padding: '18px',
+              borderRadius: '16px',
+              fontSize: '16px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(16,185,129,0.35)',
+              fontFamily: "'DM Sans', sans-serif",
+              letterSpacing: '0.2px'
+            }}>
+              ✓ Aprovar orçamento
+            </button>
+            <button onClick={recusar} style={{
+              background: 'white',
+              color: '#ef4444',
+              border: '1px solid #fecaca',
+              padding: '16px',
+              borderRadius: '16px',
+              fontSize: '15px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: "'DM Sans', sans-serif"
+            }}>
+              Recusar
+            </button>
           </div>
         )}
 
-        {/* Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '40px' }}>
-          {[
-            { label: 'Total enviados', value: total, color: '#6366f1', icon: '📋' },
-            { label: 'Aprovados', value: aprovados, color: '#10b981', icon: '✅' },
-            { label: 'Pendentes', value: pendentes, color: '#f59e0b', icon: '⏳' },
-            { label: 'Valor em aberto', value: `R$ ${valorAberto.toFixed(2).replace('.', ',')}`, color: '#8b5cf6', icon: '💰' },
-          ].map((card) => (
-            <div key={card.label} style={{
-              background: '#16181f', border: '1px solid #1e2130',
-              borderRadius: '16px', padding: '24px',
-            }}>
-              <div style={{ fontSize: '24px', marginBottom: '12px' }}>{card.icon}</div>
-              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.label}</div>
-              <div style={{ fontSize: '28px', fontWeight: 700, color: card.color, fontFamily: "'Syne', sans-serif" }}>{card.value}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Lista */}
-        <div style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '20px', overflow: 'hidden' }}>
+        {(resposta === 'aprovado' || orcamento.status === 'aprovado') && (
           <div style={{
-            padding: '20px 24px', borderBottom: '1px solid #1e2130',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            background: 'white',
+            border: '1px solid #bbf7d0',
+            borderRadius: '20px',
+            padding: '32px',
+            textAlign: 'center',
+            boxShadow: '0 4px 20px rgba(16,185,129,0.1)'
           }}>
-            <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#f1f5f9' }}>Orçamentos recentes</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '12px', color: '#4b5563' }}>{total} no total</span>
-              <button onClick={() => usuario && carregarOrcamentos(usuario)} style={{
-                background: '#1e2130', border: '1px solid #2a2d3e',
-                color: '#6b7280', padding: '6px 12px', borderRadius: '8px',
-                fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
-              }}>↻ Atualizar</button>
-            </div>
+            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎉</div>
+            <p style={{ color: '#15803d', fontWeight: 700, fontSize: '18px', margin: '0 0 8px', fontFamily: "'Syne', sans-serif" }}>
+              Orçamento aprovado!
+            </p>
+            <p style={{ color: '#4ade80', fontSize: '14px', margin: 0 }}>
+              O prestador de serviço foi notificado.
+            </p>
           </div>
+        )}
 
-          {carregando ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#4b5563' }}>Carregando...</div>
-          ) : orcamentos.length === 0 ? (
-            <div style={{ padding: '60px', textAlign: 'center' }}>
-              <div style={{ fontSize: '40px', marginBottom: '16px' }}>📋</div>
-              <p style={{ color: '#4b5563', fontSize: '14px' }}>Nenhum orçamento ainda. Crie o primeiro!</p>
-              <button onClick={() => router.push('/novo-orcamento')} style={{
-                marginTop: '16px',
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                color: 'white', border: 'none',
-                padding: '10px 24px', borderRadius: '10px',
-                fontSize: '14px', fontWeight: 600, cursor: 'pointer',
-                fontFamily: "'DM Sans', sans-serif"
-              }}>Criar orçamento</button>
-            </div>
-          ) : (
-            <div>
-              <div style={{
-                display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                padding: '12px 24px', fontSize: '11px', color: '#4b5563',
-                letterSpacing: '0.8px', textTransform: 'uppercase',
-                borderBottom: '1px solid #1e2130'
-              }}>
-                <span>Cliente</span><span>Total</span><span>Status</span><span>Ação</span>
-              </div>
-              {orcamentos.map((o) => {
-                const status = getStatusColor(o.status)
-                const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/orcamento/${o.id}`
-                return (
-                  <div key={o.id} style={{
-                    display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                    padding: '16px 24px', borderBottom: '1px solid #1e2130',
-                    alignItems: 'center'
-                  }}>
-                    <div>
-                      <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0' }}>{o.cliente}</div>
-                      {o.telefone && <div style={{ fontSize: '12px', color: '#4b5563', marginTop: '2px' }}>{o.telefone}</div>}
-                    </div>
-                    <div style={{ fontWeight: 600, color: '#a5b4fc', fontSize: '15px' }}>
-                      R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}
-                    </div>
-                    <div>
-                      <span style={{
-                        background: status.bg, color: status.text,
-                        padding: '4px 10px', borderRadius: '20px',
-                        fontSize: '11px', fontWeight: 600
-                      }}>{status.label}</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button onClick={() => { navigator.clipboard.writeText(link); alert('Link copiado!') }} style={{
-                        background: '#1e2130', border: '1px solid #2a2d3e',
-                        color: '#9ca3af', padding: '6px 12px', borderRadius: '8px',
-                        fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
-                      }}>Copiar link</button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
+        {(resposta === 'recusado' || orcamento.status === 'recusado') && (
+          <div style={{
+            background: 'white',
+            border: '1px solid #fecaca',
+            borderRadius: '20px',
+            padding: '32px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '12px' }}>😔</div>
+            <p style={{ color: '#dc2626', fontWeight: 700, fontSize: '18px', margin: '0 0 8px', fontFamily: "'Syne', sans-serif" }}>
+              Orçamento recusado.
+            </p>
+            <p style={{ color: '#f87171', fontSize: '14px', margin: 0 }}>
+              O prestador será informado.
+            </p>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div style={{ textAlign: 'center', marginTop: '24px' }}>
+          <p style={{ fontSize: '12px', color: '#cbd5e1' }}>
+            Powered by <span style={{ fontWeight: 600, color: '#8b5cf6' }}>OrcaFácil</span>
+          </p>
         </div>
+
       </div>
     </div>
-  )
-}
-
-export default function Dashboard() {
-  return (
-    <Suspense>
-      <DashboardContent />
-    </Suspense>
   )
 }
