@@ -35,6 +35,11 @@ const Icons = {
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
     </svg>
   ),
+  agenda: (active) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  ),
   relatorios: (active) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
@@ -73,6 +78,7 @@ export function Sidebar({ ativa }: { ativa: string }) {
     { key: 'home', label: 'Início', path: '/dashboard' },
     { key: 'orcamentos', label: 'Orçamentos', path: '/orcamentos' },
     { key: 'clientes', label: 'Clientes', path: '/clientes' },
+    { key: 'agenda', label: 'Agenda', path: '/agenda' },
     { key: 'relatorios', label: 'Relatórios', path: '/relatorios' },
     { key: 'perfil', label: 'Perfil', path: '/perfil' },
   ]
@@ -81,6 +87,7 @@ export function Sidebar({ ativa }: { ativa: string }) {
     { key: 'home', label: 'Dashboard', path: '/dashboard' },
     { key: 'orcamentos', label: 'Orçamentos', path: '/orcamentos' },
     { key: 'clientes', label: 'Clientes', path: '/clientes' },
+    { key: 'agenda', label: 'Agenda', path: '/agenda' },
     { key: 'relatorios', label: 'Relatórios', path: '/relatorios' },
     { key: 'perfil', label: 'Meu Perfil', path: '/perfil' },
   ]
@@ -224,9 +231,8 @@ function DashboardContent() {
     const nomeEmpresa = perfil?.nome_empresa || 'OrcaFácil'
     const msg = `Olá, tudo bem? 👋\n\nPreparei seu orçamento com todos os detalhes do serviço solicitado.\n\n📄 Clique no link abaixo para visualizar e aprovar:\n${linkGerado}\n\n✅ Serviço profissional\n✅ Transparência nos valores\n✅ Agilidade no atendimento\n\nQualquer dúvida estou à disposição! 😊\n\n— ${nomeEmpresa}`
 
-    // Pega o telefone do orçamento recém-criado
     const orcamentoAtual = orcamentos.find(o => o.id === orcamentoId)
-    const telefone = orcamentoAtual?.telefone?.replace(/\D/g, '') // remove tudo que não é número
+    const telefone = orcamentoAtual?.telefone?.replace(/\D/g, '')
 
     if (telefone) {
       window.open(`https://wa.me/55${telefone}?text=${encodeURIComponent(msg)}`)
