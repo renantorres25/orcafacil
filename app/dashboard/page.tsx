@@ -223,7 +223,16 @@ function DashboardContent() {
     if (!linkGerado) return
     const nomeEmpresa = perfil?.nome_empresa || 'OrcaFácil'
     const msg = `Olá, tudo bem? 👋\n\nPreparei seu orçamento com todos os detalhes do serviço solicitado.\n\n📄 Clique no link abaixo para visualizar e aprovar:\n${linkGerado}\n\n✅ Serviço profissional\n✅ Transparência nos valores\n✅ Agilidade no atendimento\n\nQualquer dúvida estou à disposição! 😊\n\n— ${nomeEmpresa}`
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`)
+
+    // Pega o telefone do orçamento recém-criado
+    const orcamentoAtual = orcamentos.find(o => o.id === orcamentoId)
+    const telefone = orcamentoAtual?.telefone?.replace(/\D/g, '') // remove tudo que não é número
+
+    if (telefone) {
+      window.open(`https://wa.me/55${telefone}?text=${encodeURIComponent(msg)}`)
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`)
+    }
   }
 
   function getStatusColor(status) {
