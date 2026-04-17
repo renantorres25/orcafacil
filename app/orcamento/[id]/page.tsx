@@ -30,7 +30,8 @@ export default function PaginaOrcamento({ params }) {
     setResposta('aprovado')
     const whatsapp = perfil?.telefone ? perfil.telefone.replace(/\D/g, '') : '5517991630883'
     const numero = whatsapp.startsWith('55') ? whatsapp : `55${whatsapp}`
-    const mensagem = `✅ Orçamento APROVADO!\n\nCliente: ${orcamento.cliente}\nTotal: R$ ${parseFloat(orcamento.total).toFixed(2).replace('.', ',')}`
+    const nomeEmpresa = perfil?.nome_empresa || 'OrcaFácil'
+    const mensagem = `✅ *Orçamento APROVADO!*\n\nOlá! Sou ${orcamento.cliente} e acabei de aprovar o orçamento.\n\n📋 *Detalhes:*\n• Cliente: ${orcamento.cliente}\n• Total: R$ ${parseFloat(orcamento.total).toFixed(2).replace('.', ',')}\n\nAguardo o contato para agendarmos o serviço! 😊`
     window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`, '_blank')
   }
 
@@ -70,7 +71,7 @@ export default function PaginaOrcamento({ params }) {
 
       <div style={{ maxWidth: '520px', margin: '0 auto' }}>
 
-        {/* Header com dados do prestador */}
+        {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'white',
@@ -199,8 +200,15 @@ export default function PaginaOrcamento({ params }) {
         {(resposta === 'aprovado' || orcamento.status === 'aprovado') && (
           <div style={{ background: 'white', border: '1px solid #bbf7d0', borderRadius: '20px', padding: '32px', textAlign: 'center', boxShadow: '0 4px 20px rgba(16,185,129,0.1)' }}>
             <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎉</div>
-            <p style={{ color: '#15803d', fontWeight: 700, fontSize: '18px', margin: '0 0 8px', fontFamily: "'Syne', sans-serif" }}>Orçamento aprovado!</p>
-            <p style={{ color: '#4ade80', fontSize: '14px', margin: 0 }}>{nomeEmpresa} foi notificado e entrará em contato em breve.</p>
+            <p style={{ color: '#15803d', fontWeight: 700, fontSize: '20px', margin: '0 0 8px', fontFamily: "'Syne', sans-serif" }}>
+              ✅ Orçamento aprovado com sucesso!
+            </p>
+            <p style={{ color: '#166534', fontSize: '14px', margin: '0 0 6px' }}>
+              Muito obrigado pela confiança 🙏
+            </p>
+            <p style={{ color: '#4ade80', fontSize: '13px', margin: 0 }}>
+              {nomeEmpresa} já vai organizar tudo e entrará em contato para agendar o serviço.
+            </p>
           </div>
         )}
 

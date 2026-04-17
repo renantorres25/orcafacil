@@ -4,7 +4,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { supabase } from '../superbase'
 
-// CSS global responsivo — usado em todas as páginas
 export const globalMobileCSS = `
   @media (max-width: 768px) {
     .sidebar-desktop { display: none !important; }
@@ -20,7 +19,6 @@ export const globalMobileCSS = `
   }
 `
 
-// Ícones SVG para o menu
 const Icons = {
   home: (active) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#a5b4fc' : 'none'} stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -91,7 +89,6 @@ export function Sidebar({ ativa }: { ativa: string }) {
     <>
       <style>{globalMobileCSS}</style>
 
-      {/* Sidebar desktop */}
       <div className="sidebar-desktop" style={{
         position: 'fixed', left: 0, top: 0, bottom: 0, width: '240px',
         background: '#16181f', borderRight: '1px solid #1e2130',
@@ -142,14 +139,11 @@ export function Sidebar({ ativa }: { ativa: string }) {
         </div>
       </div>
 
-      {/* Bottom nav mobile */}
       <div className="bottom-nav" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: '#16181f',
-        borderTop: '1px solid #1e2130',
+        background: '#16181f', borderTop: '1px solid #1e2130',
         paddingBottom: 'env(safe-area-inset-bottom)',
-        zIndex: 100,
-        justifyContent: 'space-around', alignItems: 'center',
+        zIndex: 100, justifyContent: 'space-around', alignItems: 'center',
         backdropFilter: 'blur(10px)',
       }}>
         {itens.map((item) => {
@@ -180,6 +174,7 @@ function DashboardContent() {
   const [orcamentos, setOrcamentos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [usuario, setUsuario] = useState(null)
+  const [perfil, setPerfil] = useState(null)
   const [mostrarLink, setMostrarLink] = useState(!!orcamentoId)
   const [copiado, setCopiado] = useState(false)
 
@@ -192,7 +187,11 @@ function DashboardContent() {
     async function carregar() {
       const { data: { user } } = await supabase.auth.getUser()
       setUsuario(user)
-      if (user) await carregarOrcamentos(user)
+      if (user) {
+        await carregarOrcamentos(user)
+        const { data: perfilData } = await supabase.from('perfis').select('*').eq('user_id', user.id).single()
+        setPerfil(perfilData)
+      }
       setCarregando(false)
     }
     carregar()
@@ -221,7 +220,10 @@ function DashboardContent() {
   }
 
   function enviarWhatsApp() {
-    if (linkGerado) window.open(`https://wa.me/?text=${encodeURIComponent(`Olá! Segue o link do seu orçamento: ${linkGerado}`)}`)
+    if (!linkGerado) return
+    const nomeEmpresa = perfil?.nome_empresa || 'OrcaFácil'
+    const msg = `Olá, tudo bem? 👋\n\nPreparei seu orçamento com todos os detalhes do serviço solicitado.\n\n📄 Clique no link abaixo para visualizar e aprovar:\n${linkGerado}\n\n✅ Serviço profissional\n✅ Transparência nos valores\n✅ Agilidade no atendimento\n\nQualquer dúvida estou à disposição! 😊\n\n— ${nomeEmpresa}`
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`)
   }
 
   function getStatusColor(status) {
