@@ -31,11 +31,23 @@ export default function Orcamentos() {
     carregar()
   }
 
+  async function marcarConcluido(id) {
+    await supabase.from('orcamentos').update({ status: 'concluido' }).eq('id', id)
+    setModalAberto(null)
+    carregar()
+  }
+
   async function salvarEdicao() {
     if (!editando) return
     setSalvandoEdicao(true)
     const totalEditado = editando.itens.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0)
-    await supabase.from('orcamentos').update({ cliente: editando.cliente, telefone: editando.telefone, itens: editando.itens, total: totalEditado }).eq('id', editando.id)
+    await supabase.from('orcamentos').update({
+      cliente: editando.cliente,
+      telefone: editando.telefone,
+      itens: editando.itens,
+      total: totalEditado,
+      observacoes: editando.observacoes || ''
+    }).eq('id', editando.id)
     setSalvandoEdicao(false)
     setEditando(null)
     setModalAberto(null)
@@ -52,11 +64,13 @@ export default function Orcamentos() {
   const aprovados = orcamentos.filter(o => o.status === 'aprovado').length
   const pendentes = orcamentos.filter(o => o.status === 'pendente').length
   const recusados = orcamentos.filter(o => o.status === 'recusado').length
-  const faturado = orcamentos.filter(o => o.status === 'aprovado').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
+  const concluidos = orcamentos.filter(o => o.status === 'concluido').length
+  const faturado = orcamentos.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
 
   function getStatusColor(status) {
     if (status === 'aprovado') return { bg: 'rgba(16,185,129,0.15)', text: '#34d399', label: 'Aprovado' }
     if (status === 'recusado') return { bg: 'rgba(239,68,68,0.15)', text: '#f87171', label: 'Recusado' }
+    if (status === 'concluido') return { bg: 'rgba(99,102,241,0.15)', text: '#a5b4fc', label: 'Concluído' }
     return { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Pendente' }
   }
 
@@ -71,7 +85,12 @@ export default function Orcamentos() {
 
   function enviarWhatsApp(o) {
     const link = `${window.location.origin}/orcamento/${o.id}`
-    window.open(`https://wa.me/?text=${encodeURIComponent(`Olá ${o.cliente}! Segue o link do seu orçamento: ${link}`)}`)
+    const telefone = o.telefone?.replace(/\D/g, '')
+    if (telefone) {
+      window.open(`https://wa.me/55${telefone}?text=${encodeURIComponent(`Olá ${o.cliente}! Segue o link do seu orçamento: ${link}`)}`)
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`Olá ${o.cliente}! Segue o link do seu orçamento: ${link}`)}`)
+    }
   }
 
   const inputStyle = {
@@ -107,14 +126,28 @@ export default function Orcamentos() {
 
             {!editando ? (
               <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '18px', fontWeight: 700, margin: 0, color: '#f1f5f9' }}>{modalAberto.cliente}</h2>
                   <button onClick={() => setModalAberto(null)} style={{ background: 'transparent', border: 'none', color: '#6b7280', fontSize: '20px', cursor: 'pointer' }}>×</button>
                 </div>
+
+                {/* Observações do orçamento */}
+                {modalAberto.observacoes && (
+                  <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: '#9ca3af' }}>
+                    📝 {modalAberto.observacoes}
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <button onClick={() => copiarLink(modalAberto.id)} style={{ background: '#1e2130', border: '1px solid #2a2d3e', color: '#a5b4fc', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", textAlign: 'left' as const }}>🔗 Copiar link do orçamento</button>
                   <button onClick={() => enviarWhatsApp(modalAberto)} style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', color: '#34d399', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", textAlign: 'left' as const }}>📲 Reenviar pelo WhatsApp</button>
                   <button onClick={() => setEditando({ ...modalAberto })} style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#a5b4fc', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", textAlign: 'left' as const }}>✏️ Editar orçamento</button>
+
+                  {/* Botão Concluído — só aparece para aprovados */}
+                  {modalAberto.status === 'aprovado' && (
+                    <button onClick={() => marcarConcluido(modalAberto.id)} style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', color: '#a5b4fc', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", textAlign: 'left' as const }}>✅ Marcar como concluído</button>
+                  )}
+
                   <div style={{ height: '1px', background: '#2a2d3e', margin: '4px 0' }} />
                   <button onClick={() => excluir(modalAberto.id)} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', padding: '14px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", textAlign: 'left' as const }}>🗑️ Excluir orçamento</button>
                 </div>
@@ -151,6 +184,19 @@ export default function Orcamentos() {
                     ))}
                     <button onClick={() => setEditando({ ...editando, itens: [...editando.itens, { descricao: '', valor: '' }] })} style={{ background: 'transparent', border: '1px dashed #2a2d3e', color: '#6366f1', padding: '8px', borderRadius: '8px', width: '100%', cursor: 'pointer', fontSize: '13px', fontFamily: "'DM Sans', sans-serif" }}>+ Adicionar item</button>
                   </div>
+
+                  {/* Campo de observações */}
+                  <div>
+                    <label style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase' as const, marginBottom: '6px', display: 'block' }}>Observações</label>
+                    <textarea
+                      value={editando.observacoes || ''}
+                      onChange={(e) => setEditando({ ...editando, observacoes: e.target.value })}
+                      placeholder="Ex: Cliente prefere horário da tarde, portão azul..."
+                      rows={3}
+                      style={{ ...inputStyle, resize: 'vertical' as const, lineHeight: '1.5' }}
+                    />
+                  </div>
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', background: 'rgba(99,102,241,0.08)', borderRadius: '10px' }}>
                     <span style={{ color: '#9ca3af', fontSize: '14px' }}>Total</span>
                     <span style={{ color: '#a5b4fc', fontWeight: 700 }}>R$ {editando.itens.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0).toFixed(2).replace('.', ',')}</span>
@@ -181,6 +227,7 @@ export default function Orcamentos() {
             { label: 'Aprovados', value: aprovados, color: '#10b981', icon: '✅', f: 'aprovado' },
             { label: 'Pendentes', value: pendentes, color: '#f59e0b', icon: '⏳', f: 'pendente' },
             { label: 'Recusados', value: recusados, color: '#ef4444', icon: '❌', f: 'recusado' },
+            { label: 'Concluídos', value: concluidos, color: '#a5b4fc', icon: '🏁', f: 'concluido' },
           ].map((card) => (
             <div key={card.label} onClick={() => setFiltro(card.f)} style={{
               background: filtro === card.f ? 'rgba(99,102,241,0.1)' : '#16181f',
@@ -192,10 +239,13 @@ export default function Orcamentos() {
               <div style={{ fontSize: '22px', fontWeight: 700, color: card.color, fontFamily: "'Syne', sans-serif" }}>{card.value}</div>
             </div>
           ))}
-          <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '16px', padding: '16px' }}>
-            <div style={{ fontSize: '20px', marginBottom: '8px' }}>💵</div>
-            <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Faturado</div>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#34d399', fontFamily: "'Syne', sans-serif" }}>R$ {faturado.toFixed(2).replace('.', ',')}</div>
+        </div>
+
+        {/* Faturado */}
+        <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '16px', padding: '16px 20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: '11px', color: '#6b7280', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '4px' }}>💵 Total faturado (aprovados + concluídos)</div>
+            <div style={{ fontSize: '24px', fontWeight: 800, color: '#34d399', fontFamily: "'Syne', sans-serif" }}>R$ {faturado.toFixed(2).replace('.', ',')}</div>
           </div>
         </div>
 
@@ -207,13 +257,15 @@ export default function Orcamentos() {
               style={{ width: '100%', background: '#16181f', border: '1px solid #1e2130', borderRadius: '12px', padding: '12px 16px 12px 42px', color: '#f1f5f9', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const, fontFamily: "'DM Sans', sans-serif" }} />
           </div>
           <div className="orc-filtros" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {['todos', 'pendente', 'aprovado', 'recusado'].map((f) => (
+            {['todos', 'pendente', 'aprovado', 'concluido', 'recusado'].map((f) => (
               <button key={f} onClick={() => setFiltro(f)} style={{
                 padding: '9px 16px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, fontFamily: "'DM Sans', sans-serif",
                 background: filtro === f ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#16181f',
                 color: filtro === f ? 'white' : '#6b7280',
                 border: filtro === f ? '1px solid transparent' : '1px solid #1e2130',
-              }}>{f === 'todos' ? 'Todos' : f.charAt(0).toUpperCase() + f.slice(1)}</button>
+              }}>
+                {f === 'todos' ? 'Todos' : f === 'concluido' ? 'Concluídos' : f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
             ))}
           </div>
         </div>
@@ -242,6 +294,7 @@ export default function Orcamentos() {
                         <span style={{ background: status.bg, color: status.text, padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{status.label}</span>
                         <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
                         <span style={{ fontSize: '11px', color: '#4b5563' }}>{formatarData(o.created_at)}</span>
+                        {o.observacoes && <span style={{ fontSize: '11px', color: '#6b7280' }}>📝</span>}
                       </div>
                     </div>
                     <button onClick={() => setModalAberto(o)} style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#a5b4fc', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>⚙️</button>
