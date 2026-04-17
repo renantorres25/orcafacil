@@ -13,6 +13,7 @@ export default function Orcamentos() {
   const [modalAberto, setModalAberto] = useState(null)
   const [editando, setEditando] = useState(null)
   const [salvandoEdicao, setSalvandoEdicao] = useState(false)
+  const [perfil, setPerfil] = useState(null)
 
   useEffect(() => { carregar() }, [])
 
@@ -21,6 +22,8 @@ export default function Orcamentos() {
     if (!user) { router.push('/'); return }
     const { data } = await supabase.from('orcamentos').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
     setOrcamentos(data || [])
+    const { data: perfilData } = await supabase.from('perfis').select('*').eq('user_id', user.id).single()
+    setPerfil(perfilData)
     setCarregando(false)
   }
 
@@ -81,10 +84,12 @@ export default function Orcamentos() {
   function enviarWhatsApp(o) {
     const link = `${window.location.origin}/orcamento/${o.id}`
     const telefone = o.telefone?.replace(/\D/g, '')
+    const nomeEmpresa = perfil?.nome_empresa || 'OrcaFácil'
+    const msg = `Olá ${o.cliente}! 👋\n\nPreparei seu orçamento com todos os detalhes do serviço solicitado.\n\n📄 Clique no link abaixo para visualizar e aprovar:\n${link}\n\n✅ Serviço profissional\n✅ Transparência nos valores\n✅ Agilidade no atendimento\n\nQualquer dúvida estou à disposição! 😊\n\n— ${nomeEmpresa}`
     if (telefone) {
-      window.open(`https://wa.me/55${telefone}?text=${encodeURIComponent(`Olá ${o.cliente}! Segue o link do seu orçamento: ${link}`)}`)
+      window.open(`https://wa.me/55${telefone}?text=${encodeURIComponent(msg)}`)
     } else {
-      window.open(`https://wa.me/?text=${encodeURIComponent(`Olá ${o.cliente}! Segue o link do seu orçamento: ${link}`)}`)
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`)
     }
   }
 
@@ -129,13 +134,11 @@ export default function Orcamentos() {
                   <button onClick={() => setModalAberto(null)} style={{ background: 'transparent', border: 'none', color: '#6b7280', fontSize: '20px', cursor: 'pointer' }}>×</button>
                 </div>
 
-                {/* Total */}
                 <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05))', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13px', color: '#9ca3af' }}>Total</span>
                   <span style={{ fontSize: '20px', fontWeight: 800, color: '#a5b4fc', fontFamily: "'Syne', sans-serif" }}>R$ {parseFloat(modalAberto.total).toFixed(2).replace('.', ',')}</span>
                 </div>
 
-                {/* Itens */}
                 {modalAberto.itens?.length > 0 && (
                   <div style={{ background: '#1e2130', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>🔧 Serviços</div>
@@ -148,7 +151,6 @@ export default function Orcamentos() {
                   </div>
                 )}
 
-                {/* Contato */}
                 {modalAberto.telefone && (
                   <div style={{ background: '#1e2130', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>📱 WhatsApp</div>
@@ -156,7 +158,6 @@ export default function Orcamentos() {
                   </div>
                 )}
 
-                {/* Endereço */}
                 {modalAberto.endereco && (
                   <div style={{ background: '#1e2130', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>📍 Endereço</div>
@@ -169,7 +170,6 @@ export default function Orcamentos() {
                   </div>
                 )}
 
-                {/* Observações */}
                 {modalAberto.observacoes && (
                   <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>📝 Observações</div>
@@ -177,7 +177,6 @@ export default function Orcamentos() {
                   </div>
                 )}
 
-                {/* Agendamento */}
                 {modalAberto.data_agendamento && (
                   <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>📅 Agendado para</div>
@@ -187,7 +186,6 @@ export default function Orcamentos() {
                   </div>
                 )}
 
-                {/* Ações */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
                   <button onClick={() => copiarLink(modalAberto.id)} style={{ background: '#1e2130', border: '1px solid #2a2d3e', color: '#a5b4fc', padding: '13px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", textAlign: 'left' as const }}>🔗 Copiar link</button>
                   <button onClick={() => enviarWhatsApp(modalAberto)} style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', color: '#34d399', padding: '13px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", textAlign: 'left' as const }}>📲 Reenviar pelo WhatsApp</button>
