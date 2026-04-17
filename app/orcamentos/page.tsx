@@ -131,6 +131,19 @@ export default function Orcamentos() {
                   <button onClick={() => setModalAberto(null)} style={{ background: 'transparent', border: 'none', color: '#6b7280', fontSize: '20px', cursor: 'pointer' }}>×</button>
                 </div>
 
+                {/* Endereço */}
+                {modalAberto.endereco && (
+                  <div style={{ background: '#1e2130', border: '1px solid #2a2d3e', borderRadius: '10px', padding: '10px 14px', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>📍 Endereço</div>
+                    <div style={{ fontSize: '13px', color: '#e2e8f0' }}>{modalAberto.endereco}</div>
+                    {modalAberto.complemento && <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>{modalAberto.complemento}</div>}
+                    <button onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(modalAberto.endereco)}`, '_blank')}
+                      style={{ marginTop: '8px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)', color: '#a5b4fc', padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+                      🗺️ Abrir no Maps
+                    </button>
+                  </div>
+                )}
+
                 {/* Observações do orçamento */}
                 {modalAberto.observacoes && (
                   <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: '#9ca3af' }}>
@@ -166,6 +179,14 @@ export default function Orcamentos() {
                   <div>
                     <label style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase' as const, marginBottom: '6px', display: 'block' }}>WhatsApp</label>
                     <input type="text" value={editando.telefone} onChange={(e) => setEditando({ ...editando, telefone: e.target.value })} style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase' as const, marginBottom: '6px', display: 'block' }}>📍 Endereço</label>
+                    <input type="text" value={editando.endereco || ''} placeholder="Ex: Rua das Flores, 123" onChange={(e) => setEditando({ ...editando, endereco: e.target.value })} style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase' as const, marginBottom: '6px', display: 'block' }}>🏠 Complemento / Referência</label>
+                    <input type="text" value={editando.complemento || ''} placeholder="Ex: Portão azul, tocar interfone..." onChange={(e) => setEditando({ ...editando, complemento: e.target.value })} style={inputStyle} />
                   </div>
                   <div>
                     <label style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase' as const, marginBottom: '6px', display: 'block' }}>Itens</label>

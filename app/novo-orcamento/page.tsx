@@ -12,6 +12,9 @@ export default function NovoOrcamento() {
   const router = useRouter()
   const [cliente, setCliente] = useState('')
   const [telefone, setTelefone] = useState('')
+  const [endereco, setEndereco] = useState('')
+  const [complemento, setComplemento] = useState('')
+  const [observacoes, setObservacoes] = useState('')
   const [itens, setItens] = useState<Item[]>([{ descricao: '', valor: '' }])
   const [salvando, setSalvando] = useState(false)
 
@@ -33,7 +36,8 @@ export default function NovoOrcamento() {
     if (!user) { alert('Você precisa estar logado!'); setSalvando(false); return }
     const itensFiltrados = itens.filter(i => i.descricao.trim() !== '')
     const { data, error } = await supabase.from('orcamentos').insert({
-      cliente, telefone, itens: itensFiltrados, total, user_id: user.id, status: 'pendente'
+      cliente, telefone, endereco, complemento, observacoes,
+      itens: itensFiltrados, total, user_id: user.id, status: 'pendente'
     }).select()
     if (error) { alert('Erro ao salvar: ' + error.message); setSalvando(false); return }
     router.push(`/dashboard?orcamento=${data[0].id}`)
@@ -97,6 +101,14 @@ export default function NovoOrcamento() {
               <label style={labelStyle}>WhatsApp</label>
               <input type="text" placeholder="Ex: (11) 99999-9999" value={telefone} onChange={(e) => setTelefone(e.target.value)} style={inputStyle} />
             </div>
+            <div>
+              <label style={labelStyle}>📍 Endereço</label>
+              <input type="text" placeholder="Ex: Rua das Flores, 123 - Jardim São Paulo" value={endereco} onChange={(e) => setEndereco(e.target.value)} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>🏠 Complemento / Referência</label>
+              <input type="text" placeholder="Ex: Portão azul, tocar interfone, apto 42..." value={complemento} onChange={(e) => setComplemento(e.target.value)} style={inputStyle} />
+            </div>
           </div>
         </div>
 
@@ -127,6 +139,18 @@ export default function NovoOrcamento() {
             color: '#6366f1', padding: '10px', borderRadius: '10px', width: '100%',
             cursor: 'pointer', fontSize: '13px', fontWeight: 600, fontFamily: "'DM Sans', sans-serif"
           }}>+ Adicionar item</button>
+        </div>
+
+        {/* Observações */}
+        <div style={cardStyle}>
+          <h2 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 600, color: '#e2e8f0' }}>📝 Observações</h2>
+          <textarea
+            placeholder="Ex: Levar escada, cliente prefere horário da tarde, trazer cabo específico..."
+            value={observacoes}
+            onChange={(e) => setObservacoes(e.target.value)}
+            rows={3}
+            style={{ ...inputStyle, resize: 'vertical' as const, lineHeight: '1.6' }}
+          />
         </div>
 
         {/* Total */}
