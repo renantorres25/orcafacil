@@ -34,114 +34,214 @@ export default function NovoOrcamento() {
   }, 0)
 
   async function gerarOrcamento() {
-    if (!cliente) {
-      alert('Preencha o nome do cliente!')
-      return
-    }
-    if (itens.every(i => !i.descricao)) {
-      alert('Adicione pelo menos um item!')
-      return
-    }
-
+    if (!cliente) { alert('Preencha o nome do cliente!'); return }
+    if (itens.every(i => !i.descricao)) { alert('Adicione pelo menos um item!'); return }
     setSalvando(true)
-
     const { data, error } = await supabase
       .from('orcamentos')
       .insert({ cliente, telefone, itens, total })
       .select()
-
-    if (error) {
-      alert('Erro ao salvar: ' + error.message)
-      setSalvando(false)
-      return
-    }
-
+    if (error) { alert('Erro ao salvar: ' + error.message); setSalvando(false); return }
     const id = data[0].id
     router.push(`/dashboard?orcamento=${id}`)
   }
 
+  const inputStyle = {
+    width: '100%',
+    background: '#0f1117',
+    border: '1px solid #1e2130',
+    borderRadius: '10px',
+    padding: '12px 16px',
+    color: '#f1f5f9',
+    fontSize: '14px',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+    fontFamily: "'DM Sans', sans-serif",
+  }
+
+  const labelStyle = {
+    fontSize: '12px',
+    color: '#6b7280',
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase' as const,
+    marginBottom: '8px',
+    display: 'block'
+  }
+
+  const cardStyle = {
+    background: '#16181f',
+    border: '1px solid #1e2130',
+    borderRadius: '16px',
+    padding: '24px',
+    marginBottom: '16px'
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600">
-            ← Voltar
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">Novo orçamento</h1>
+    <div style={{
+      minHeight: '100vh',
+      background: '#0f1117',
+      fontFamily: "'DM Sans', sans-serif",
+      color: '#f1f5f9',
+      padding: '40px 24px'
+    }}>
+      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+
+      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+          <button onClick={() => router.back()} style={{
+            background: '#16181f',
+            border: '1px solid #1e2130',
+            color: '#6b7280',
+            padding: '8px 16px',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontFamily: "'DM Sans', sans-serif"
+          }}>← Voltar</button>
+          <div>
+            <h1 style={{
+              fontFamily: "'Syne', sans-serif",
+              fontSize: '24px',
+              fontWeight: 800,
+              margin: 0,
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>Novo orçamento</h1>
+            <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#4b5563' }}>Preencha os dados e gere o link</p>
+          </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-4">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Dados do cliente</h2>
-          <div className="flex flex-col gap-4">
+        {/* Dados do cliente */}
+        <div style={cardStyle}>
+          <h2 style={{ margin: '0 0 20px', fontSize: '15px', fontWeight: 600, color: '#e2e8f0' }}>
+            👤 Dados do cliente
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">Nome do cliente</label>
+              <label style={labelStyle}>Nome do cliente</label>
               <input
                 type="text"
                 placeholder="Ex: João Silva"
                 value={cliente}
                 onChange={(e) => setCliente(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={inputStyle}
               />
             </div>
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">WhatsApp</label>
+              <label style={labelStyle}>WhatsApp</label>
               <input
                 type="text"
                 placeholder="Ex: (11) 99999-9999"
                 value={telefone}
                 onChange={(e) => setTelefone(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={inputStyle}
               />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-4">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Itens do serviço</h2>
-          <div className="flex flex-col gap-3">
+        {/* Itens */}
+        <div style={cardStyle}>
+          <h2 style={{ margin: '0 0 20px', fontSize: '15px', fontWeight: 600, color: '#e2e8f0' }}>
+            🔧 Itens do serviço
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {itens.map((item, index) => (
-              <div key={index} className="flex gap-3 items-center">
+              <div key={index} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <input
                   type="text"
                   placeholder="Descrição do serviço"
                   value={item.descricao}
                   onChange={(e) => atualizarItem(index, 'descricao', e.target.value)}
-                  className="flex-1 border border-gray-200 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ ...inputStyle, flex: 1 }}
                 />
                 <input
                   type="number"
                   placeholder="R$ 0"
                   value={item.valor}
                   onChange={(e) => atualizarItem(index, 'valor', e.target.value)}
-                  className="w-32 border border-gray-200 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ ...inputStyle, width: '120px' }}
                 />
                 {itens.length > 1 && (
-                  <button onClick={() => removerItem(index)} className="text-red-400 hover:text-red-600 font-bold text-lg">×</button>
+                  <button onClick={() => removerItem(index)} style={{
+                    background: 'rgba(239,68,68,0.1)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                    color: '#ef4444',
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>×</button>
                 )}
               </div>
             ))}
           </div>
-          <button onClick={adicionarItem} className="mt-4 text-blue-600 hover:underline text-sm font-medium">
-            + Adicionar item
-          </button>
+          <button onClick={adicionarItem} style={{
+            marginTop: '16px',
+            background: 'transparent',
+            border: '1px dashed #2a2d3e',
+            color: '#6366f1',
+            padding: '10px',
+            borderRadius: '10px',
+            width: '100%',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: 600,
+            fontFamily: "'DM Sans', sans-serif"
+          }}>+ Adicionar item</button>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-semibold text-gray-800">Total</span>
-            <span className="text-2xl font-bold text-blue-600">
+        {/* Total */}
+        <div style={{
+          ...cardStyle,
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05))',
+          border: '1px solid rgba(99,102,241,0.2)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '16px', fontWeight: 600, color: '#e2e8f0' }}>Total</span>
+            <span style={{
+              fontSize: '32px',
+              fontWeight: 800,
+              fontFamily: "'Syne', sans-serif",
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
               R$ {total.toFixed(2).replace('.', ',')}
             </span>
           </div>
         </div>
 
+        {/* Botão */}
         <button
           onClick={gerarOrcamento}
           disabled={salvando}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-colors text-lg"
-        >
-          {salvando ? 'Salvando...' : 'Gerar link do orçamento'}
+          style={{
+            width: '100%',
+            background: salvando ? '#374151' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+            color: 'white',
+            border: 'none',
+            padding: '16px',
+            borderRadius: '14px',
+            fontSize: '16px',
+            fontWeight: 700,
+            cursor: salvando ? 'not-allowed' : 'pointer',
+            boxShadow: salvando ? 'none' : '0 4px 24px rgba(99,102,241,0.4)',
+            fontFamily: "'DM Sans', sans-serif",
+            letterSpacing: '0.3px',
+            transition: 'all 0.2s'
+          }}>
+          {salvando ? 'Salvando...' : '🔗 Gerar link do orçamento'}
         </button>
+
       </div>
     </div>
   )
