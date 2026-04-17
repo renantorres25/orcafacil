@@ -12,23 +12,49 @@ function DashboardContent() {
   const [orcamentos, setOrcamentos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [usuario, setUsuario] = useState(null)
+  const [mostrarLink, setMostrarLink] = useState(!!orcamentoId)
+  const [copiado, setCopiado] = useState(false)
+
+  async function carregarOrcamentos(user) {
+    const { data } = await supabase
+      .from('orcamentos')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+    setOrcamentos(data || [])
+  }
 
   useEffect(() => {
     async function carregar() {
       const { data: { user } } = await supabase.auth.getUser()
       setUsuario(user)
       if (user) {
-        const { data } = await supabase
-          .from('orcamentos')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-        setOrcamentos(data || [])
+        await carregarOrcamentos(user)
       }
       setCarregando(false)
     }
     carregar()
   }, [])
+
+  // Atualização automática a cada 30 segundos
+  useEffect(() => {
+    if (!usuario) return
+    const interval = setInterval(() => {
+      carregarOrcamentos(usuario)
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [usuario])
+
+  // Esconder mensagem de link após 10 segundos
+  useEffect(() => {
+    if (mostrarLink) {
+      const timer = setTimeout(() => {
+        setMostrarLink(false)
+        router.replace('/dashboard')
+      }, 10000)
+      return () => clearTimeout(timer)
+    }
+  }, [mostrarLink])
 
   const total = orcamentos.length
   const aprovados = orcamentos.filter(o => o.status === 'aprovado').length
@@ -40,7 +66,8 @@ function DashboardContent() {
   function copiarLink() {
     if (linkGerado) {
       navigator.clipboard.writeText(linkGerado)
-      alert('Link copiado!')
+      setCopiado(true)
+      setTimeout(() => setCopiado(false), 2000)
     }
   }
 
@@ -57,9 +84,9 @@ function DashboardContent() {
   }
 
   function getStatusColor(status) {
-    if (status === 'aprovado') return { bg: '#dcfce7', text: '#15803d', label: 'Aprovado' }
-    if (status === 'recusado') return { bg: '#fee2e2', text: '#dc2626', label: 'Recusado' }
-    return { bg: '#fef9c3', text: '#a16207', label: 'Pendente' }
+    if (status === 'aprovado') return { bg: 'rgba(16,185,129,0.15)', text: '#34d399', label: 'Aprovado' }
+    if (status === 'recusado') return { bg: 'rgba(239,68,68,0.15)', text: '#f87171', label: 'Recusado' }
+    return { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Pendente' }
   }
 
   return (
@@ -74,9 +101,7 @@ function DashboardContent() {
       {/* Sidebar */}
       <div style={{
         position: 'fixed',
-        left: 0,
-        top: 0,
-        bottom: 0,
+        left: 0, top: 0, bottom: 0,
         width: '240px',
         background: '#16181f',
         borderRight: '1px solid #1e2130',
@@ -93,7 +118,6 @@ function DashboardContent() {
             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            letterSpacing: '-0.5px'
           }}>OrcaFácil</div>
           <div style={{ fontSize: '11px', color: '#4b5563', marginTop: '2px', letterSpacing: '0.5px' }}>PAINEL PROFISSIONAL</div>
         </div>
@@ -118,7 +142,6 @@ function DashboardContent() {
               cursor: 'pointer',
               fontSize: '14px',
               fontWeight: item.active ? 600 : 400,
-              transition: 'all 0.2s'
             }}>
               <span style={{ fontSize: '16px' }}>{item.icon}</span>
               {item.label}
@@ -126,26 +149,20 @@ function DashboardContent() {
           ))}
         </nav>
 
-        <div style={{
-          padding: '12px',
-          borderRadius: '12px',
-          background: '#1e2130',
-          border: '1px solid #2a2d3e'
-        }}>
+        <div style={{ padding: '12px', borderRadius: '12px', background: '#1e2130', border: '1px solid #2a2d3e' }}>
           <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Conta</div>
           <div style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {usuario?.email || '...'}
           </div>
           <button onClick={sair} style={{
-            width: '100%',
-            padding: '8px',
+            width: '100%', padding: '8px',
             background: 'transparent',
             border: '1px solid #374151',
             borderRadius: '8px',
             color: '#6b7280',
             fontSize: '13px',
             cursor: 'pointer',
-            transition: 'all 0.2s'
+            fontFamily: "'DM Sans', sans-serif"
           }}>Sair</button>
         </div>
       </div>
@@ -154,81 +171,64 @@ function DashboardContent() {
       <div style={{ marginLeft: '240px', padding: '32px 40px' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
           <div>
             <h1 style={{
               fontFamily: "'Syne', sans-serif",
-              fontSize: '28px',
-              fontWeight: 800,
-              color: '#f1f5f9',
-              margin: 0,
-              letterSpacing: '-0.5px'
+              fontSize: '28px', fontWeight: 800,
+              color: '#f1f5f9', margin: 0,
             }}>Bem-vindo de volta 👋</h1>
             <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>
               Gerencie seus orçamentos com facilidade
             </p>
           </div>
-          <button
-            onClick={() => router.push('/novo-orcamento')}
-            style={{
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              color: 'white',
-              border: 'none',
-              padding: '12px 24px',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 4px 24px rgba(99,102,241,0.4)',
-              letterSpacing: '0.2px'
-            }}>
-            + Novo orçamento
-          </button>
+          <button onClick={() => router.push('/novo-orcamento')} style={{
+            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+            color: 'white', border: 'none',
+            padding: '12px 24px', borderRadius: '12px',
+            fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+            boxShadow: '0 4px 24px rgba(99,102,241,0.4)',
+            fontFamily: "'DM Sans', sans-serif"
+          }}>+ Novo orçamento</button>
         </div>
 
-        {/* Link gerado */}
-        {linkGerado && (
+        {/* Link gerado — some após 10s */}
+        {mostrarLink && linkGerado && (
           <div style={{
             background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))',
             border: '1px solid rgba(16,185,129,0.3)',
             borderRadius: '16px',
             padding: '24px',
-            marginBottom: '32px'
+            marginBottom: '32px',
+            position: 'relative'
           }}>
+            <button onClick={() => { setMostrarLink(false); router.replace('/dashboard') }} style={{
+              position: 'absolute', top: '12px', right: '16px',
+              background: 'transparent', border: 'none',
+              color: '#6b7280', fontSize: '20px', cursor: 'pointer'
+            }}>×</button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span style={{ fontSize: '20px' }}>✅</span>
               <span style={{ color: '#34d399', fontWeight: 600, fontSize: '16px' }}>Orçamento criado com sucesso!</span>
             </div>
             <div style={{
-              background: 'rgba(0,0,0,0.3)',
-              borderRadius: '10px',
-              padding: '12px 16px',
-              fontSize: '13px',
-              color: '#9ca3af',
-              wordBreak: 'break-all',
-              marginBottom: '16px',
-              border: '1px solid #1e2130'
+              background: 'rgba(0,0,0,0.3)', borderRadius: '10px',
+              padding: '12px 16px', fontSize: '13px', color: '#9ca3af',
+              wordBreak: 'break-all', marginBottom: '16px', border: '1px solid #1e2130'
             }}>{linkGerado}</div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button onClick={copiarLink} style={{
-                background: '#059669',
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}>Copiar link</button>
+                background: copiado ? '#047857' : '#059669',
+                color: 'white', border: 'none',
+                padding: '10px 20px', borderRadius: '10px',
+                fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                fontFamily: "'DM Sans', sans-serif"
+              }}>{copiado ? '✓ Copiado!' : 'Copiar link'}</button>
               <button onClick={enviarWhatsApp} style={{
-                background: '#16a34a',
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer'
+                background: '#16a34a', color: 'white', border: 'none',
+                padding: '10px 20px', borderRadius: '10px',
+                fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                fontFamily: "'DM Sans', sans-serif"
               }}>📲 Enviar pelo WhatsApp</button>
             </div>
           </div>
@@ -243,11 +243,8 @@ function DashboardContent() {
             { label: 'Valor em aberto', value: `R$ ${valorAberto.toFixed(2).replace('.', ',')}`, color: '#8b5cf6', icon: '💰' },
           ].map((card) => (
             <div key={card.label} style={{
-              background: '#16181f',
-              border: '1px solid #1e2130',
-              borderRadius: '16px',
-              padding: '24px',
-              transition: 'transform 0.2s'
+              background: '#16181f', border: '1px solid #1e2130',
+              borderRadius: '16px', padding: '24px',
             }}>
               <div style={{ fontSize: '24px', marginBottom: '12px' }}>{card.icon}</div>
               <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.label}</div>
@@ -256,22 +253,21 @@ function DashboardContent() {
           ))}
         </div>
 
-        {/* Lista de orçamentos */}
-        <div style={{
-          background: '#16181f',
-          border: '1px solid #1e2130',
-          borderRadius: '20px',
-          overflow: 'hidden'
-        }}>
+        {/* Lista */}
+        <div style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '20px', overflow: 'hidden' }}>
           <div style={{
-            padding: '20px 24px',
-            borderBottom: '1px solid #1e2130',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
+            padding: '20px 24px', borderBottom: '1px solid #1e2130',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
             <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#f1f5f9' }}>Orçamentos recentes</h2>
-            <span style={{ fontSize: '12px', color: '#4b5563' }}>{total} no total</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '12px', color: '#4b5563' }}>{total} no total</span>
+              <button onClick={() => usuario && carregarOrcamentos(usuario)} style={{
+                background: '#1e2130', border: '1px solid #2a2d3e',
+                color: '#6b7280', padding: '6px 12px', borderRadius: '8px',
+                fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
+              }}>↻ Atualizar</button>
+            </div>
           </div>
 
           {carregando ? (
@@ -283,44 +279,30 @@ function DashboardContent() {
               <button onClick={() => router.push('/novo-orcamento')} style={{
                 marginTop: '16px',
                 background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                color: 'white',
-                border: 'none',
-                padding: '10px 24px',
-                borderRadius: '10px',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer'
+                color: 'white', border: 'none',
+                padding: '10px 24px', borderRadius: '10px',
+                fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                fontFamily: "'DM Sans', sans-serif"
               }}>Criar orçamento</button>
             </div>
           ) : (
             <div>
-              {/* Header da tabela */}
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                padding: '12px 24px',
-                fontSize: '11px',
-                color: '#4b5563',
-                letterSpacing: '0.8px',
-                textTransform: 'uppercase',
+                display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr',
+                padding: '12px 24px', fontSize: '11px', color: '#4b5563',
+                letterSpacing: '0.8px', textTransform: 'uppercase',
                 borderBottom: '1px solid #1e2130'
               }}>
-                <span>Cliente</span>
-                <span>Total</span>
-                <span>Status</span>
-                <span>Ação</span>
+                <span>Cliente</span><span>Total</span><span>Status</span><span>Ação</span>
               </div>
               {orcamentos.map((o) => {
                 const status = getStatusColor(o.status)
                 const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/orcamento/${o.id}`
                 return (
                   <div key={o.id} style={{
-                    display: 'grid',
-                    gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                    padding: '16px 24px',
-                    borderBottom: '1px solid #1e2130',
-                    alignItems: 'center',
-                    transition: 'background 0.2s'
+                    display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr',
+                    padding: '16px 24px', borderBottom: '1px solid #1e2130',
+                    alignItems: 'center'
                   }}>
                     <div>
                       <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0' }}>{o.cliente}</div>
@@ -331,23 +313,16 @@ function DashboardContent() {
                     </div>
                     <div>
                       <span style={{
-                        background: status.bg,
-                        color: status.text,
-                        padding: '4px 10px',
-                        borderRadius: '20px',
-                        fontSize: '11px',
-                        fontWeight: 600
+                        background: status.bg, color: status.text,
+                        padding: '4px 10px', borderRadius: '20px',
+                        fontSize: '11px', fontWeight: 600
                       }}>{status.label}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => { navigator.clipboard.writeText(link); alert('Link copiado!') }} style={{
-                        background: '#1e2130',
-                        border: '1px solid #2a2d3e',
-                        color: '#9ca3af',
-                        padding: '6px 12px',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        cursor: 'pointer'
+                        background: '#1e2130', border: '1px solid #2a2d3e',
+                        color: '#9ca3af', padding: '6px 12px', borderRadius: '8px',
+                        fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
                       }}>Copiar link</button>
                     </div>
                   </div>
