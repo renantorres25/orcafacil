@@ -4,7 +4,51 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { supabase } from '../superbase'
 
-// Sidebar responsiva
+// CSS global responsivo — usado em todas as páginas
+export const globalMobileCSS = `
+  @media (max-width: 768px) {
+    .sidebar-desktop { display: none !important; }
+    .main-content { margin-left: 0 !important; padding: 20px 16px 90px 16px !important; }
+    .bottom-nav { display: flex !important; }
+    .cards-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .hide-mobile { display: none !important; }
+    .novo-btn { padding: 10px 16px !important; font-size: 13px !important; }
+    .page-title { font-size: 22px !important; }
+  }
+  @media (min-width: 769px) {
+    .bottom-nav { display: none !important; }
+  }
+`
+
+// Ícones SVG para o menu
+const Icons = {
+  home: (active) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#a5b4fc' : 'none'} stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  ),
+  orcamentos: (active) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+    </svg>
+  ),
+  clientes: (active) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  ),
+  relatorios: (active) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+    </svg>
+  ),
+  perfil: (active) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+  ),
+}
+
 export function Sidebar({ ativa }: { ativa: string }) {
   const router = useRouter()
   const [usuario, setUsuario] = useState(null)
@@ -28,30 +72,24 @@ export function Sidebar({ ativa }: { ativa: string }) {
   }
 
   const itens = [
-    { icon: '▦', label: 'Dashboard', path: '/dashboard' },
-    { icon: '◈', label: 'Orçamentos', path: '/orcamentos' },
-    { icon: '◉', label: 'Clientes', path: '/clientes' },
-    { icon: '◎', label: 'Relatórios', path: '/relatorios' },
-    { icon: '⊙', label: 'Meu Perfil', path: '/perfil' },
+    { key: 'home', label: 'Início', path: '/dashboard' },
+    { key: 'orcamentos', label: 'Orçamentos', path: '/orcamentos' },
+    { key: 'clientes', label: 'Clientes', path: '/clientes' },
+    { key: 'relatorios', label: 'Relatórios', path: '/relatorios' },
+    { key: 'perfil', label: 'Perfil', path: '/perfil' },
+  ]
+
+  const itensSidebar = [
+    { key: 'home', label: 'Dashboard', path: '/dashboard' },
+    { key: 'orcamentos', label: 'Orçamentos', path: '/orcamentos' },
+    { key: 'clientes', label: 'Clientes', path: '/clientes' },
+    { key: 'relatorios', label: 'Relatórios', path: '/relatorios' },
+    { key: 'perfil', label: 'Meu Perfil', path: '/perfil' },
   ]
 
   return (
     <>
-      <style>{`
-        @media (max-width: 768px) {
-          .sidebar-desktop { display: none !important; }
-          .main-content { margin-left: 0 !important; padding: 16px 16px 80px 16px !important; }
-          .bottom-nav { display: flex !important; }
-          .header-title { font-size: 20px !important; }
-          .cards-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .table-grid { grid-template-columns: 1fr 1fr !important; }
-          .table-hide { display: none !important; }
-          .novo-btn { padding: 10px 14px !important; font-size: 13px !important; }
-        }
-        @media (min-width: 769px) {
-          .bottom-nav { display: none !important; }
-        }
-      `}</style>
+      <style>{globalMobileCSS}</style>
 
       {/* Sidebar desktop */}
       <div className="sidebar-desktop" style={{
@@ -59,7 +97,7 @@ export function Sidebar({ ativa }: { ativa: string }) {
         background: '#16181f', borderRight: '1px solid #1e2130',
         display: 'flex', flexDirection: 'column', padding: '24px 16px', zIndex: 10
       }}>
-        <div style={{ marginBottom: '40px', padding: '0 8px' }}>
+        <div style={{ marginBottom: '32px', padding: '0 8px' }}>
           <div style={{
             fontFamily: "'Syne', sans-serif", fontSize: '22px', fontWeight: 800,
             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -69,11 +107,7 @@ export function Sidebar({ ativa }: { ativa: string }) {
         </div>
 
         {perfil?.nome_empresa && (
-          <div style={{
-            marginBottom: '20px', padding: '10px 12px',
-            background: 'rgba(99,102,241,0.08)', borderRadius: '10px',
-            border: '1px solid rgba(99,102,241,0.15)'
-          }}>
+          <div style={{ marginBottom: '20px', padding: '10px 12px', background: 'rgba(99,102,241,0.08)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.15)' }}>
             <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '2px' }}>Empresa</div>
             <div style={{ fontSize: '13px', color: '#a5b4fc', fontWeight: 600 }}>{perfil.nome_empresa}</div>
             {perfil.especialidade && <div style={{ fontSize: '11px', color: '#4b5563', marginTop: '2px' }}>{perfil.especialidade}</div>}
@@ -81,10 +115,10 @@ export function Sidebar({ ativa }: { ativa: string }) {
         )}
 
         <nav style={{ flex: 1 }}>
-          {itens.map((item) => {
+          {itensSidebar.map((item) => {
             const active = ativa === item.path
             return (
-              <div key={item.label} onClick={() => router.push(item.path)} style={{
+              <div key={item.key} onClick={() => router.push(item.path)} style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
                 padding: '10px 12px', borderRadius: '10px', marginBottom: '4px',
                 background: active ? 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1))' : 'transparent',
@@ -92,7 +126,7 @@ export function Sidebar({ ativa }: { ativa: string }) {
                 color: active ? '#a5b4fc' : '#6b7280',
                 cursor: 'pointer', fontSize: '14px', fontWeight: active ? 600 : 400,
               }}>
-                <span style={{ fontSize: '16px' }}>{item.icon}</span>
+                {Icons[item.key](active)}
                 {item.label}
               </div>
             )
@@ -104,34 +138,31 @@ export function Sidebar({ ativa }: { ativa: string }) {
           <div style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {usuario?.email || '...'}
           </div>
-          <button onClick={sair} style={{
-            width: '100%', padding: '8px', background: 'transparent',
-            border: '1px solid #374151', borderRadius: '8px', color: '#6b7280',
-            fontSize: '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
-          }}>Sair</button>
+          <button onClick={sair} style={{ width: '100%', padding: '8px', background: 'transparent', border: '1px solid #374151', borderRadius: '8px', color: '#6b7280', fontSize: '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Sair</button>
         </div>
       </div>
 
       {/* Bottom nav mobile */}
       <div className="bottom-nav" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: '#16181f', borderTop: '1px solid #1e2130',
-        padding: '8px 0 12px', zIndex: 100,
-        justifyContent: 'space-around', alignItems: 'center'
+        background: '#16181f',
+        borderTop: '1px solid #1e2130',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        zIndex: 100,
+        justifyContent: 'space-around', alignItems: 'center',
+        backdropFilter: 'blur(10px)',
       }}>
         {itens.map((item) => {
           const active = ativa === item.path
           return (
-            <div key={item.label} onClick={() => router.push(item.path)} style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
-              padding: '6px 12px', borderRadius: '10px', cursor: 'pointer',
-              color: active ? '#a5b4fc' : '#4b5563',
+            <div key={item.key} onClick={() => router.push(item.path)} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
+              padding: '10px 8px', cursor: 'pointer', flex: 1,
+              borderTop: active ? '2px solid #6366f1' : '2px solid transparent',
             }}>
-              <span style={{ fontSize: '20px' }}>{item.icon}</span>
-              <span style={{ fontSize: '10px', fontWeight: active ? 600 : 400 }}>
-                {item.label === 'Dashboard' ? 'Início' :
-                 item.label === 'Orçamentos' ? 'Orçam.' :
-                 item.label === 'Meu Perfil' ? 'Perfil' : item.label}
+              {Icons[item.key](active)}
+              <span style={{ fontSize: '10px', fontWeight: active ? 600 : 400, color: active ? '#a5b4fc' : '#4b5563' }}>
+                {item.label}
               </span>
             </div>
           )
@@ -207,10 +238,9 @@ function DashboardContent() {
 
       <div className="main-content" style={{ marginLeft: '240px', padding: '32px 40px' }}>
 
-        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
-            <h1 className="header-title" style={{ fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>Bem-vindo 👋</h1>
+            <h1 className="page-title" style={{ fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>Bem-vindo 👋</h1>
             <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>Gerencie seus orçamentos</p>
           </div>
           <button className="novo-btn" onClick={() => router.push('/novo-orcamento')} style={{
@@ -220,36 +250,21 @@ function DashboardContent() {
           }}>+ Novo</button>
         </div>
 
-        {/* Link gerado */}
         {mostrarLink && linkGerado && (
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))',
-            border: '1px solid rgba(16,185,129,0.3)', borderRadius: '16px',
-            padding: '20px', marginBottom: '24px', position: 'relative'
-          }}>
-            <button onClick={() => { setMostrarLink(false); router.replace('/dashboard') }} style={{
-              position: 'absolute', top: '12px', right: '16px',
-              background: 'transparent', border: 'none', color: '#6b7280', fontSize: '20px', cursor: 'pointer'
-            }}>×</button>
+          <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '16px', padding: '20px', marginBottom: '24px', position: 'relative' }}>
+            <button onClick={() => { setMostrarLink(false); router.replace('/dashboard') }} style={{ position: 'absolute', top: '12px', right: '16px', background: 'transparent', border: 'none', color: '#6b7280', fontSize: '20px', cursor: 'pointer' }}>×</button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
               <span>✅</span>
               <span style={{ color: '#34d399', fontWeight: 600, fontSize: '15px' }}>Orçamento criado!</span>
             </div>
-            <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '10px 14px', fontSize: '12px', color: '#9ca3af', wordBreak: 'break-all', marginBottom: '14px' }}>
-              {linkGerado}
-            </div>
+            <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '10px 14px', fontSize: '12px', color: '#9ca3af', wordBreak: 'break-all', marginBottom: '14px' }}>{linkGerado}</div>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <button onClick={copiarLink} style={{ background: copiado ? '#047857' : '#059669', color: 'white', border: 'none', padding: '10px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-                {copiado ? '✓ Copiado!' : 'Copiar link'}
-              </button>
-              <button onClick={enviarWhatsApp} style={{ background: '#16a34a', color: 'white', border: 'none', padding: '10px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-                📲 WhatsApp
-              </button>
+              <button onClick={copiarLink} style={{ background: copiado ? '#047857' : '#059669', color: 'white', border: 'none', padding: '10px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>{copiado ? '✓ Copiado!' : 'Copiar link'}</button>
+              <button onClick={enviarWhatsApp} style={{ background: '#16a34a', color: 'white', border: 'none', padding: '10px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>📲 WhatsApp</button>
             </div>
           </div>
         )}
 
-        {/* Cards */}
         <div className="cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
           {[
             { label: 'Total', value: total, color: '#6366f1', icon: '📋' },
@@ -265,14 +280,10 @@ function DashboardContent() {
           ))}
         </div>
 
-        {/* Lista */}
         <div style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '20px', overflow: 'hidden' }}>
           <div style={{ padding: '16px 20px', borderBottom: '1px solid #1e2130', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#f1f5f9' }}>Orçamentos recentes</h2>
-            <button onClick={() => usuario && carregarOrcamentos(usuario)} style={{
-              background: '#1e2130', border: '1px solid #2a2d3e', color: '#6b7280',
-              padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
-            }}>↻</button>
+            <button onClick={() => usuario && carregarOrcamentos(usuario)} style={{ background: '#1e2130', border: '1px solid #2a2d3e', color: '#6b7280', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>↻</button>
           </div>
 
           {carregando ? (
@@ -281,11 +292,7 @@ function DashboardContent() {
             <div style={{ padding: '40px', textAlign: 'center' }}>
               <div style={{ fontSize: '36px', marginBottom: '12px' }}>📋</div>
               <p style={{ color: '#4b5563', fontSize: '14px' }}>Nenhum orçamento ainda.</p>
-              <button onClick={() => router.push('/novo-orcamento')} style={{
-                marginTop: '12px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px',
-                fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
-              }}>Criar orçamento</button>
+              <button onClick={() => router.push('/novo-orcamento')} style={{ marginTop: '12px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Criar orçamento</button>
             </div>
           ) : (
             <div>
@@ -301,11 +308,7 @@ function DashboardContent() {
                         <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
                       </div>
                     </div>
-                    <button onClick={() => { navigator.clipboard.writeText(link); alert('Link copiado!') }} style={{
-                      background: '#1e2130', border: '1px solid #2a2d3e', color: '#9ca3af',
-                      padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer',
-                      fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0
-                    }}>🔗</button>
+                    <button onClick={() => { navigator.clipboard.writeText(link); alert('Link copiado!') }} style={{ background: '#1e2130', border: '1px solid #2a2d3e', color: '#9ca3af', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0 }}>🔗</button>
                   </div>
                 )
               })}
