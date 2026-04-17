@@ -36,19 +36,10 @@ export default function Perfil() {
     setSalvando(true)
     const { data: { user } } = await supabase.auth.getUser()
     const { error } = await supabase.from('perfis').upsert({
-      user_id: user.id,
-      nome_empresa: nomeEmpresa,
-      especialidade,
-      telefone,
-      instagram,
-      email
+      user_id: user.id, nome_empresa: nomeEmpresa, especialidade, telefone, instagram, email
     }, { onConflict: 'user_id' })
-    if (error) {
-      setMensagem('Erro ao salvar: ' + error.message)
-    } else {
-      setMensagem('Perfil salvo com sucesso!')
-      setTimeout(() => setMensagem(''), 3000)
-    }
+    if (error) { setMensagem('Erro ao salvar: ' + error.message) }
+    else { setMensagem('Perfil salvo com sucesso!'); setTimeout(() => setMensagem(''), 3000) }
     setSalvando(false)
   }
 
@@ -76,68 +67,47 @@ export default function Perfil() {
 
       <Sidebar ativa="/perfil" />
 
-      <div style={{ marginLeft: '240px', padding: '40px' }}>
+      <div className="main-content" style={{ marginLeft: '240px', padding: '32px 40px' }}>
         <div style={{ maxWidth: '560px' }}>
-
-          <div style={{ marginBottom: '32px' }}>
-            <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>
-              Meu Perfil ⚙️
-            </h1>
-            <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>
-              Essas informações aparecem nos seus orçamentos
-            </p>
+          <div style={{ marginBottom: '24px' }}>
+            <h1 className="page-title" style={{ fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>Meu Perfil ⚙️</h1>
+            <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>Essas informações aparecem nos seus orçamentos</p>
           </div>
 
-          <div style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '20px', padding: '32px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '20px', padding: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
-              {/* Informações básicas */}
-              <div style={{ fontSize: '13px', color: '#6366f1', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                Informações básicas
-              </div>
+              <div style={{ fontSize: '12px', color: '#6366f1', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Informações básicas</div>
 
               <div>
                 <label style={labelStyle}>Nome da empresa ou seu nome</label>
-                <input type="text" placeholder="Ex: Elétrica do João" value={nomeEmpresa}
-                  onChange={(e) => setNomeEmpresa(e.target.value)} style={inputStyle} />
+                <input type="text" placeholder="Ex: Elétrica do João" value={nomeEmpresa} onChange={(e) => setNomeEmpresa(e.target.value)} style={inputStyle} />
               </div>
 
               <div>
                 <label style={labelStyle}>Especialidade</label>
-                <input type="text" placeholder="Ex: Eletricista, Encanador, Pedreiro..." value={especialidade}
-                  onChange={(e) => setEspecialidade(e.target.value)} style={inputStyle} />
+                <input type="text" placeholder="Ex: Eletricista, Encanador..." value={especialidade} onChange={(e) => setEspecialidade(e.target.value)} style={inputStyle} />
               </div>
 
-              {/* Divisor */}
               <div style={{ height: '1px', background: '#1e2130' }} />
 
-              {/* Contato */}
-              <div style={{ fontSize: '13px', color: '#6366f1', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                Contato
-              </div>
+              <div style={{ fontSize: '12px', color: '#6366f1', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Contato</div>
 
               <div>
                 <label style={labelStyle}>📱 WhatsApp</label>
-                <input type="text" placeholder="Ex: 11999999999" value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)} style={inputStyle} />
+                <input type="text" placeholder="Ex: 11999999999" value={telefone} onChange={(e) => setTelefone(e.target.value)} style={inputStyle} />
               </div>
 
               <div>
                 <label style={labelStyle}>✉️ E-mail profissional</label>
-                <input type="email" placeholder="Ex: joao@eletricadojoao.com.br" value={email}
-                  onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
+                <input type="email" placeholder="Ex: joao@empresa.com.br" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
               </div>
 
               <div>
                 <label style={labelStyle}>📸 Instagram</label>
                 <div style={{ position: 'relative' }}>
-                  <span style={{
-                    position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
-                    color: '#6b7280', fontSize: '14px'
-                  }}>@</span>
-                  <input type="text" placeholder="seuinstagram" value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                    style={{ ...inputStyle, paddingLeft: '32px' }} />
+                  <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280', fontSize: '14px' }}>@</span>
+                  <input type="text" placeholder="seuinstagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} style={{ ...inputStyle, paddingLeft: '32px' }} />
                 </div>
               </div>
 
@@ -151,8 +121,7 @@ export default function Perfil() {
               )}
 
               <button onClick={salvar} disabled={salvando} style={{
-                width: '100%',
-                background: salvando ? '#374151' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                width: '100%', background: salvando ? '#374151' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                 color: 'white', border: 'none', padding: '14px', borderRadius: '12px',
                 fontSize: '15px', fontWeight: 600, cursor: salvando ? 'not-allowed' : 'pointer',
                 boxShadow: salvando ? 'none' : '0 4px 24px rgba(99,102,241,0.35)',
@@ -160,7 +129,6 @@ export default function Perfil() {
               }}>
                 {salvando ? 'Salvando...' : 'Salvar perfil'}
               </button>
-
             </div>
           </div>
         </div>
