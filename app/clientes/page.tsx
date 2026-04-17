@@ -79,9 +79,9 @@ export default function Clientes() {
 
       {/* Modal histórico do cliente */}
       {clienteSelecionado && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}
           onClick={() => setClienteSelecionado(null)}>
-          <div style={{ background: '#16181f', border: '1px solid #2a2d3e', borderRadius: '20px 20px 0 0', padding: '24px', width: '100%', maxWidth: '540px', maxHeight: '85vh', overflowY: 'auto' }}
+          <div style={{ background: '#16181f', border: '1px solid #2a2d3e', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '540px', maxHeight: '85vh', overflowY: 'auto' }}
             onClick={(e) => e.stopPropagation()}>
             <div style={{ width: '40px', height: '4px', background: '#2a2d3e', borderRadius: '2px', margin: '0 auto 20px' }} />
 
