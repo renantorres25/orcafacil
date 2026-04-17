@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../superbase'
+import { Sidebar } from '../dashboard/page'
 
 export default function Perfil() {
   const router = useRouter()
@@ -16,13 +17,7 @@ export default function Perfil() {
     async function carregarPerfil() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/'); return }
-
-      const { data } = await supabase
-        .from('perfis')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-
+      const { data } = await supabase.from('perfis').select('*').eq('user_id', user.id).single()
       if (data) {
         setNomeEmpresa(data.nome_empresa || '')
         setEspecialidade(data.especialidade || '')
@@ -36,16 +31,12 @@ export default function Perfil() {
   async function salvar() {
     setSalvando(true)
     const { data: { user } } = await supabase.auth.getUser()
-
-    const { error } = await supabase
-      .from('perfis')
-      .upsert({
-        user_id: user.id,
-        nome_empresa: nomeEmpresa,
-        especialidade,
-        telefone
-      }, { onConflict: 'user_id' })
-
+    const { error } = await supabase.from('perfis').upsert({
+      user_id: user.id,
+      nome_empresa: nomeEmpresa,
+      especialidade,
+      telefone
+    }, { onConflict: 'user_id' })
     if (error) {
       setMensagem('Erro ao salvar: ' + error.message)
     } else {
@@ -56,25 +47,15 @@ export default function Perfil() {
   }
 
   const inputStyle = {
-    width: '100%',
-    background: '#0f1117',
-    border: '1px solid #1e2130',
-    borderRadius: '10px',
-    padding: '12px 16px',
-    color: '#f1f5f9',
-    fontSize: '14px',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
+    width: '100%', background: '#0f1117', border: '1px solid #1e2130',
+    borderRadius: '10px', padding: '12px 16px', color: '#f1f5f9',
+    fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const,
     fontFamily: "'DM Sans', sans-serif",
   }
 
   const labelStyle = {
-    fontSize: '12px',
-    color: '#6b7280',
-    letterSpacing: '0.5px',
-    textTransform: 'uppercase' as const,
-    marginBottom: '8px',
-    display: 'block'
+    fontSize: '12px', color: '#6b7280', letterSpacing: '0.5px',
+    textTransform: 'uppercase' as const, marginBottom: '8px', display: 'block'
   }
 
   if (carregando) return (
@@ -84,69 +65,18 @@ export default function Perfil() {
   )
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#0f1117',
-      fontFamily: "'DM Sans', sans-serif",
-      color: '#f1f5f9'
-    }}>
+    <div style={{ minHeight: '100vh', background: '#0f1117', fontFamily: "'DM Sans', sans-serif", color: '#f1f5f9' }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 
-      {/* Sidebar */}
-      <div style={{
-        position: 'fixed', left: 0, top: 0, bottom: 0, width: '240px',
-        background: '#16181f', borderRight: '1px solid #1e2130',
-        display: 'flex', flexDirection: 'column', padding: '24px 16px', zIndex: 10
-      }}>
-        <div style={{ marginBottom: '40px', padding: '0 8px' }}>
-          <div style={{
-            fontFamily: "'Syne', sans-serif", fontSize: '22px', fontWeight: 800,
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>OrcaFácil</div>
-          <div style={{ fontSize: '11px', color: '#4b5563', marginTop: '2px', letterSpacing: '0.5px' }}>PAINEL PROFISSIONAL</div>
-        </div>
+      <Sidebar ativa="/perfil" />
 
-        <nav style={{ flex: 1 }}>
-          {[
-            { icon: '▦', label: 'Dashboard', path: '/dashboard' },
-            { icon: '◈', label: 'Orçamentos', path: '/orcamentos' },
-            { icon: '◉', label: 'Clientes', path: '/clientes' },
-            { icon: '◎', label: 'Relatórios', path: '/relatorios' },
-            { icon: '⊙', label: 'Meu Perfil', path: '/perfil', active: true },
-          ].map((item) => (
-            <div key={item.label} onClick={() => router.push(item.path)} style={{
-              display: 'flex', alignItems: 'center', gap: '12px',
-              padding: '10px 12px', borderRadius: '10px', marginBottom: '4px',
-              background: item.active ? 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1))' : 'transparent',
-              border: item.active ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',
-              color: item.active ? '#a5b4fc' : '#6b7280',
-              cursor: 'pointer', fontSize: '14px', fontWeight: item.active ? 600 : 400,
-            }}>
-              <span style={{ fontSize: '16px' }}>{item.icon}</span>
-              {item.label}
-            </div>
-          ))}
-        </nav>
-
-        <div style={{ padding: '12px', borderRadius: '12px', background: '#1e2130', border: '1px solid #2a2d3e' }}>
-          <button onClick={() => { supabase.auth.signOut(); router.push('/') }} style={{
-            width: '100%', padding: '8px', background: 'transparent',
-            border: '1px solid #374151', borderRadius: '8px', color: '#6b7280',
-            fontSize: '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif"
-          }}>Sair</button>
-        </div>
-      </div>
-
-      {/* Conteúdo */}
       <div style={{ marginLeft: '240px', padding: '40px' }}>
         <div style={{ maxWidth: '560px' }}>
 
           <div style={{ marginBottom: '32px' }}>
-            <h1 style={{
-              fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800,
-              color: '#f1f5f9', margin: 0
-            }}>Meu Perfil ⚙️</h1>
+            <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>
+              Meu Perfil ⚙️
+            </h1>
             <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>
               Essas informações aparecem nos seus orçamentos
             </p>
@@ -157,29 +87,20 @@ export default function Perfil() {
 
               <div>
                 <label style={labelStyle}>Nome da empresa ou seu nome</label>
-                <input
-                  type="text" placeholder="Ex: Elétrica do João"
-                  value={nomeEmpresa} onChange={(e) => setNomeEmpresa(e.target.value)}
-                  style={inputStyle}
-                />
+                <input type="text" placeholder="Ex: Elétrica do João" value={nomeEmpresa}
+                  onChange={(e) => setNomeEmpresa(e.target.value)} style={inputStyle} />
               </div>
 
               <div>
                 <label style={labelStyle}>Especialidade</label>
-                <input
-                  type="text" placeholder="Ex: Eletricista, Encanador, Pedreiro..."
-                  value={especialidade} onChange={(e) => setEspecialidade(e.target.value)}
-                  style={inputStyle}
-                />
+                <input type="text" placeholder="Ex: Eletricista, Encanador, Pedreiro..." value={especialidade}
+                  onChange={(e) => setEspecialidade(e.target.value)} style={inputStyle} />
               </div>
 
               <div>
                 <label style={labelStyle}>WhatsApp para notificações</label>
-                <input
-                  type="text" placeholder="Ex: 11999999999"
-                  value={telefone} onChange={(e) => setTelefone(e.target.value)}
-                  style={inputStyle}
-                />
+                <input type="text" placeholder="Ex: 11999999999" value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)} style={inputStyle} />
               </div>
 
               {mensagem && (
