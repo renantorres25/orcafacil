@@ -9,6 +9,8 @@ export default function Perfil() {
   const [nomeEmpresa, setNomeEmpresa] = useState('')
   const [especialidade, setEspecialidade] = useState('')
   const [telefone, setTelefone] = useState('')
+  const [instagram, setInstagram] = useState('')
+  const [email, setEmail] = useState('')
   const [salvando, setSalvando] = useState(false)
   const [mensagem, setMensagem] = useState('')
   const [carregando, setCarregando] = useState(true)
@@ -22,6 +24,8 @@ export default function Perfil() {
         setNomeEmpresa(data.nome_empresa || '')
         setEspecialidade(data.especialidade || '')
         setTelefone(data.telefone || '')
+        setInstagram(data.instagram || '')
+        setEmail(data.email || '')
       }
       setCarregando(false)
     }
@@ -35,7 +39,9 @@ export default function Perfil() {
       user_id: user.id,
       nome_empresa: nomeEmpresa,
       especialidade,
-      telefone
+      telefone,
+      instagram,
+      email
     }, { onConflict: 'user_id' })
     if (error) {
       setMensagem('Erro ao salvar: ' + error.message)
@@ -85,6 +91,11 @@ export default function Perfil() {
           <div style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '20px', padding: '32px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
+              {/* Informações básicas */}
+              <div style={{ fontSize: '13px', color: '#6366f1', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                Informações básicas
+              </div>
+
               <div>
                 <label style={labelStyle}>Nome da empresa ou seu nome</label>
                 <input type="text" placeholder="Ex: Elétrica do João" value={nomeEmpresa}
@@ -97,10 +108,37 @@ export default function Perfil() {
                   onChange={(e) => setEspecialidade(e.target.value)} style={inputStyle} />
               </div>
 
+              {/* Divisor */}
+              <div style={{ height: '1px', background: '#1e2130' }} />
+
+              {/* Contato */}
+              <div style={{ fontSize: '13px', color: '#6366f1', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                Contato
+              </div>
+
               <div>
-                <label style={labelStyle}>WhatsApp para notificações</label>
+                <label style={labelStyle}>📱 WhatsApp</label>
                 <input type="text" placeholder="Ex: 11999999999" value={telefone}
                   onChange={(e) => setTelefone(e.target.value)} style={inputStyle} />
+              </div>
+
+              <div>
+                <label style={labelStyle}>✉️ E-mail profissional</label>
+                <input type="email" placeholder="Ex: joao@eletricadojoao.com.br" value={email}
+                  onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
+              </div>
+
+              <div>
+                <label style={labelStyle}>📸 Instagram</label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{
+                    position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
+                    color: '#6b7280', fontSize: '14px'
+                  }}>@</span>
+                  <input type="text" placeholder="seuinstagram" value={instagram}
+                    onChange={(e) => setInstagram(e.target.value)}
+                    style={{ ...inputStyle, paddingLeft: '32px' }} />
+                </div>
               </div>
 
               {mensagem && (
