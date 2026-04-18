@@ -124,7 +124,7 @@ export default function Home() {
               <div style={{ flex: 1, height: '1px', background: '#1e2130' }} />
             </div>
 
-            <button onClick={cadastrar} disabled={carregando} style={{ width: '100%', background: 'transparent', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)', padding: '14px', borderRadius: '12px', fontSize: '15px', fontWeight: 600, cursor: carregando ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+            <button onClick={() => router.push('/cadastro')} style={{ width: '100%', background: 'transparent', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)', padding: '14px', borderRadius: '12px', fontSize: '15px', fontWeight: 600, cursor: carregando ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
               Criar conta grátis
             </button>
           </div>
