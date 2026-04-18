@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../superbase'
 import { Sidebar } from '../dashboard/page'
 
-function titleCase(str) {
+// Função mais robusta — funciona com qualquer case
+function tc(str) {
   if (!str) return ''
-  return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+  return str.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
 
 export default function Orcamentos() {
@@ -110,12 +111,15 @@ export default function Orcamentos() {
     { label: 'Recusados', value: recusados, color: '#f87171', icon: '❌', f: 'recusado' },
   ]
 
+  // Rótulos dos filtros no plural
+  const filtroLabel = { todos: 'Todos', pendente: 'Pendentes', aprovado: 'Aprovados', concluido: 'Concluídos', recusado: 'Recusados' }
+
   return (
     <div style={{ minHeight: '100vh', background: '#0f1117', fontFamily: "'DM Sans', sans-serif", color: '#f1f5f9' }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       <style>{`
         @media (max-width: 768px) {
-          .orc-cards { grid-template-columns: repeat(3, 1fr) !important; }
+          .orc-cards { grid-template-columns: repeat(2, 1fr) !important; }
           .orc-filtros { gap: 6px !important; }
           .orc-filtros button { font-size: 11px !important; padding: 6px 10px !important; }
         }
@@ -135,7 +139,7 @@ export default function Orcamentos() {
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                   <div>
-                    <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '20px', fontWeight: 700, margin: '0 0 6px', color: '#f1f5f9' }}>{titleCase(modalAberto.cliente)}</h2>
+                    <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '20px', fontWeight: 700, margin: '0 0 6px', color: '#f1f5f9' }}>{tc(modalAberto.cliente)}</h2>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       {(() => { const s = getStatusColor(modalAberto.status); return <span style={{ background: s.bg, color: s.text, padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{s.label}</span> })()}
                       <span style={{ fontSize: '12px', color: '#4b5563' }}>{formatarData(modalAberto.created_at)}</span>
@@ -246,7 +250,7 @@ export default function Orcamentos() {
           <button className="novo-btn" onClick={() => router.push('/novo-orcamento')} style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 24px rgba(99,102,241,0.4)', fontFamily: "'DM Sans', sans-serif" }}>+ Novo</button>
         </div>
 
-        {/* Cards compactos em grid 2x3 */}
+        {/* Cards — 5 colunas desktop, 2 colunas mobile */}
         <div className="orc-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '16px' }}>
           {cards.map((card) => (
             <div key={card.label} onClick={() => setFiltro(card.f)} style={{
@@ -263,7 +267,7 @@ export default function Orcamentos() {
           ))}
         </div>
 
-        {/* Busca e filtros */}
+        {/* Busca e filtros com plural */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#4b5563', fontSize: '14px' }}>🔍</span>
@@ -271,14 +275,14 @@ export default function Orcamentos() {
               style={{ width: '100%', background: '#16181f', border: '1px solid #1e2130', borderRadius: '10px', padding: '10px 16px 10px 40px', color: '#f1f5f9', fontSize: '13px', outline: 'none', boxSizing: 'border-box' as const, fontFamily: "'DM Sans', sans-serif" }} />
           </div>
           <div className="orc-filtros" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {['todos', 'pendente', 'aprovado', 'concluido', 'recusado'].map((f) => (
+            {(['todos', 'pendente', 'aprovado', 'concluido', 'recusado'] as const).map((f) => (
               <button key={f} onClick={() => setFiltro(f)} style={{
                 padding: '7px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 600, fontFamily: "'DM Sans', sans-serif",
                 background: filtro === f ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#16181f',
                 color: filtro === f ? 'white' : '#6b7280',
                 border: filtro === f ? '1px solid transparent' : '1px solid #1e2130',
               }}>
-                {f === 'todos' ? 'Todos' : f === 'concluido' ? 'Concluídos' : f.charAt(0).toUpperCase() + f.slice(1)}
+                {filtroLabel[f]}
               </button>
             ))}
           </div>
@@ -303,7 +307,7 @@ export default function Orcamentos() {
                   <div key={o.id} className="orc-linha" onClick={() => setModalAberto(o)}
                     style={{ padding: '13px 18px', borderBottom: '1px solid #1e2130', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', cursor: 'pointer', transition: 'background 0.15s' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleCase(o.cliente)}</div>
+                      <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tc(o.cliente)}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', flexWrap: 'wrap' }}>
                         <span style={{ background: status.bg, color: status.text, padding: '1px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{status.label}</span>
                         <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>

@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../superbase'
 import { Sidebar } from '../dashboard/page'
 
-function titleCase(str) {
+function tc(str) {
   if (!str) return ''
-  return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+  return str.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
 
 function fmt(val: number) {
@@ -198,7 +198,7 @@ export default function Relatorios() {
                         <div style={{ width: '20px', height: '20px', borderRadius: '5px', flexShrink: 0, background: i === 0 ? '#6366f1' : '#1e2130', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: i === 0 ? 'white' : '#6b7280' }}>{i + 1}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                            <span style={{ fontSize: '13px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleCase(s.nome)}</span>
+                            <span style={{ fontSize: '13px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tc(s.nome)}</span>
                             <span style={{ fontSize: '12px', fontWeight: 600, color: '#a5b4fc', flexShrink: 0, marginLeft: '8px' }}>R$ {s.total.toFixed(0)}</span>
                           </div>
                           <div style={{ background: '#2a2d3e', borderRadius: '3px', height: '3px', overflow: 'hidden' }}>
@@ -230,7 +230,7 @@ export default function Relatorios() {
                     return (
                       <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#1e2130', borderRadius: '10px' }}>
                         <div>
-                          <div style={{ fontSize: '13px', fontWeight: 500, color: '#e2e8f0' }}>{titleCase(o.cliente)}</div>
+                          <div style={{ fontSize: '13px', fontWeight: 500, color: '#e2e8f0' }}>{tc(o.cliente)}</div>
                           <div style={{ fontSize: '11px', color: '#4b5563', marginTop: '1px' }}>{new Date(o.created_at).toLocaleDateString('pt-BR')}</div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
