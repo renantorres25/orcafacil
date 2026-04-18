@@ -4,6 +4,11 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../superbase'
 import { Sidebar } from '../dashboard/page'
 
+function titleCase(str) {
+  if (!str) return ''
+  return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+}
+
 export default function Orcamentos() {
   const router = useRouter()
   const [orcamentos, setOrcamentos] = useState([])
@@ -30,14 +35,12 @@ export default function Orcamentos() {
   async function excluir(id) {
     if (!confirm('Tem certeza que deseja excluir este orçamento?')) return
     await supabase.from('orcamentos').delete().eq('id', id)
-    setModalAberto(null)
-    carregar()
+    setModalAberto(null); carregar()
   }
 
   async function marcarConcluido(id) {
     await supabase.from('orcamentos').update({ status: 'concluido' }).eq('id', id)
-    setModalAberto(null)
-    carregar()
+    setModalAberto(null); carregar()
   }
 
   async function salvarEdicao() {
@@ -63,7 +66,6 @@ export default function Orcamentos() {
   const pendentes = orcamentos.filter(o => o.status === 'pendente').length
   const recusados = orcamentos.filter(o => o.status === 'recusado').length
   const concluidos = orcamentos.filter(o => o.status === 'concluido').length
-  const faturado = orcamentos.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
 
   function getStatusColor(status) {
     if (status === 'aprovado') return { bg: 'rgba(16,185,129,0.15)', text: '#34d399', label: 'Aprovado' }
@@ -100,32 +102,40 @@ export default function Orcamentos() {
     fontFamily: "'DM Sans', sans-serif",
   }
 
+  const cards = [
+    { label: 'Total', value: total, color: '#6366f1', icon: '📋', f: 'todos' },
+    { label: 'Pendentes', value: pendentes, color: '#f59e0b', icon: '⏳', f: 'pendente' },
+    { label: 'Aprovados', value: aprovados, color: '#10b981', icon: '✅', f: 'aprovado' },
+    { label: 'Concluídos', value: concluidos, color: '#a5b4fc', icon: '🏁', f: 'concluido' },
+    { label: 'Recusados', value: recusados, color: '#f87171', icon: '❌', f: 'recusado' },
+  ]
+
   return (
     <div style={{ minHeight: '100vh', background: '#0f1117', fontFamily: "'DM Sans', sans-serif", color: '#f1f5f9' }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       <style>{`
         @media (max-width: 768px) {
-          .orc-cards { grid-template-columns: repeat(2, 1fr) !important; }
-          .orc-filtros { flex-wrap: wrap !important; }
-          .orc-filtros button { font-size: 11px !important; padding: 7px 10px !important; }
+          .orc-cards { grid-template-columns: repeat(3, 1fr) !important; }
+          .orc-filtros { gap: 6px !important; }
+          .orc-filtros button { font-size: 11px !important; padding: 6px 10px !important; }
         }
         .orc-linha:hover { background: rgba(99,102,241,0.05) !important; }
       `}</style>
 
       <Sidebar ativa="/orcamentos" />
 
+      {/* Modal */}
       {modalAberto && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
           onClick={() => { setModalAberto(null); setEditando(null) }}>
           <div style={{ background: '#16181f', border: '1px solid #2a2d3e', borderRadius: '20px 20px 0 0', padding: '24px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}
             onClick={(e) => e.stopPropagation()}>
             <div style={{ width: '40px', height: '4px', background: '#2a2d3e', borderRadius: '2px', margin: '0 auto 20px' }} />
-
             {!editando ? (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                   <div>
-                    <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '20px', fontWeight: 700, margin: '0 0 6px', color: '#f1f5f9' }}>{modalAberto.cliente}</h2>
+                    <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '20px', fontWeight: 700, margin: '0 0 6px', color: '#f1f5f9' }}>{titleCase(modalAberto.cliente)}</h2>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       {(() => { const s = getStatusColor(modalAberto.status); return <span style={{ background: s.bg, color: s.text, padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{s.label}</span> })()}
                       <span style={{ fontSize: '12px', color: '#4b5563' }}>{formatarData(modalAberto.created_at)}</span>
@@ -133,12 +143,10 @@ export default function Orcamentos() {
                   </div>
                   <button onClick={() => setModalAberto(null)} style={{ background: 'transparent', border: 'none', color: '#6b7280', fontSize: '20px', cursor: 'pointer' }}>×</button>
                 </div>
-
-                <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05))', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13px', color: '#9ca3af' }}>Total</span>
-                  <span style={{ fontSize: '20px', fontWeight: 800, color: '#a5b4fc', fontFamily: "'Syne', sans-serif" }}>R$ {parseFloat(modalAberto.total).toFixed(2).replace('.', ',')}</span>
+                  <span style={{ fontSize: '18px', fontWeight: 700, color: '#a5b4fc' }}>R$ {parseFloat(modalAberto.total).toFixed(2).replace('.', ',')}</span>
                 </div>
-
                 {modalAberto.itens?.length > 0 && (
                   <div style={{ background: '#1e2130', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>🔧 Serviços</div>
@@ -150,14 +158,12 @@ export default function Orcamentos() {
                     ))}
                   </div>
                 )}
-
                 {modalAberto.telefone && (
                   <div style={{ background: '#1e2130', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>📱 WhatsApp</div>
                     <div style={{ fontSize: '14px', color: '#e2e8f0' }}>{modalAberto.telefone}</div>
                   </div>
                 )}
-
                 {modalAberto.endereco && (
                   <div style={{ background: '#1e2130', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>📍 Endereço</div>
@@ -169,14 +175,12 @@ export default function Orcamentos() {
                     </button>
                   </div>
                 )}
-
                 {modalAberto.observacoes && (
                   <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>📝 Observações</div>
                     <div style={{ fontSize: '13px', color: '#9ca3af', lineHeight: '1.5' }}>{modalAberto.observacoes}</div>
                   </div>
                 )}
-
                 {modalAberto.data_agendamento && (
                   <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>📅 Agendado para</div>
@@ -185,7 +189,6 @@ export default function Orcamentos() {
                     </div>
                   </div>
                 )}
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
                   <button onClick={() => copiarLink(modalAberto.id)} style={{ background: '#1e2130', border: '1px solid #2a2d3e', color: '#a5b4fc', padding: '13px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", textAlign: 'left' as const }}>🔗 Copiar link</button>
                   <button onClick={() => enviarWhatsApp(modalAberto)} style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', color: '#34d399', padding: '13px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", textAlign: 'left' as const }}>📲 Reenviar pelo WhatsApp</button>
@@ -235,7 +238,7 @@ export default function Orcamentos() {
       )}
 
       <div className="main-content" style={{ marginLeft: '240px', padding: '32px 40px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
             <h1 className="page-title" style={{ fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>Orçamentos 📋</h1>
             <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>Gerencie todos os seus orçamentos</p>
@@ -243,50 +246,53 @@ export default function Orcamentos() {
           <button className="novo-btn" onClick={() => router.push('/novo-orcamento')} style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 24px rgba(99,102,241,0.4)', fontFamily: "'DM Sans', sans-serif" }}>+ Novo</button>
         </div>
 
-        <div className="orc-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginBottom: '24px' }}>
-          {[
-            { label: 'Total', value: total, color: '#6366f1', icon: '📋', f: 'todos' },
-            { label: 'Aprovados', value: aprovados, color: '#10b981', icon: '✅', f: 'aprovado' },
-            { label: 'Pendentes', value: pendentes, color: '#f59e0b', icon: '⏳', f: 'pendente' },
-            { label: 'Recusados', value: recusados, color: '#ef4444', icon: '❌', f: 'recusado' },
-            { label: 'Concluídos', value: concluidos, color: '#a5b4fc', icon: '🏁', f: 'concluido' },
-          ].map((card) => (
-            <div key={card.label} onClick={() => setFiltro(card.f)} style={{ background: filtro === card.f ? 'rgba(99,102,241,0.1)' : '#16181f', border: filtro === card.f ? '1px solid rgba(99,102,241,0.4)' : '1px solid #1e2130', borderRadius: '16px', padding: '16px', cursor: 'pointer', transition: 'all 0.2s' }}>
-              <div style={{ fontSize: '20px', marginBottom: '8px' }}>{card.icon}</div>
-              <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.label}</div>
-              <div style={{ fontSize: '22px', fontWeight: 700, color: card.color, fontFamily: "'Syne', sans-serif" }}>{card.value}</div>
+        {/* Cards compactos em grid 2x3 */}
+        <div className="orc-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '16px' }}>
+          {cards.map((card) => (
+            <div key={card.label} onClick={() => setFiltro(card.f)} style={{
+              background: filtro === card.f ? 'rgba(99,102,241,0.1)' : '#16181f',
+              border: filtro === card.f ? '1px solid rgba(99,102,241,0.35)' : '1px solid #1e2130',
+              borderRadius: '12px', padding: '12px 14px', cursor: 'pointer', transition: 'all 0.15s'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span style={{ fontSize: '13px' }}>{card.icon}</span>
+                <span style={{ fontSize: '18px', fontWeight: 700, color: card.color, fontFamily: "'Syne', sans-serif" }}>{card.value}</span>
+              </div>
+              <div style={{ fontSize: '10px', color: '#4b5563', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.label}</div>
             </div>
           ))}
         </div>
 
-        <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '16px', padding: '16px 20px', marginBottom: '20px' }}>
-          <div style={{ fontSize: '11px', color: '#6b7280', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '4px' }}>💵 Total faturado (aprovados + concluídos)</div>
-          <div style={{ fontSize: '24px', fontWeight: 800, color: '#34d399', fontFamily: "'Syne', sans-serif" }}>R$ {faturado.toFixed(2).replace('.', ',')}</div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+        {/* Busca e filtros */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
           <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#4b5563' }}>🔍</span>
-            <input type="text" placeholder="Buscar cliente..." value={busca} onChange={(e) => setBusca(e.target.value)} style={{ width: '100%', background: '#16181f', border: '1px solid #1e2130', borderRadius: '12px', padding: '12px 16px 12px 42px', color: '#f1f5f9', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const, fontFamily: "'DM Sans', sans-serif" }} />
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#4b5563', fontSize: '14px' }}>🔍</span>
+            <input type="text" placeholder="Buscar cliente..." value={busca} onChange={(e) => setBusca(e.target.value)}
+              style={{ width: '100%', background: '#16181f', border: '1px solid #1e2130', borderRadius: '10px', padding: '10px 16px 10px 40px', color: '#f1f5f9', fontSize: '13px', outline: 'none', boxSizing: 'border-box' as const, fontFamily: "'DM Sans', sans-serif" }} />
           </div>
           <div className="orc-filtros" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {['todos', 'pendente', 'aprovado', 'concluido', 'recusado'].map((f) => (
-              <button key={f} onClick={() => setFiltro(f)} style={{ padding: '9px 16px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, fontFamily: "'DM Sans', sans-serif", background: filtro === f ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#16181f', color: filtro === f ? 'white' : '#6b7280', border: filtro === f ? '1px solid transparent' : '1px solid #1e2130' }}>
+              <button key={f} onClick={() => setFiltro(f)} style={{
+                padding: '7px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 600, fontFamily: "'DM Sans', sans-serif",
+                background: filtro === f ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#16181f',
+                color: filtro === f ? 'white' : '#6b7280',
+                border: filtro === f ? '1px solid transparent' : '1px solid #1e2130',
+              }}>
                 {f === 'todos' ? 'Todos' : f === 'concluido' ? 'Concluídos' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
           </div>
         </div>
 
-        <div style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '20px', overflow: 'hidden' }}>
-          <div style={{ padding: '14px 20px', borderBottom: '1px solid #1e2130' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#f1f5f9' }}>{filtrados.length} {filtrados.length === 1 ? 'orçamento' : 'orçamentos'}</span>
+        {/* Lista */}
+        <div style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ padding: '12px 18px', borderBottom: '1px solid #1e2130' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>{filtrados.length} {filtrados.length === 1 ? 'orçamento' : 'orçamentos'}</span>
           </div>
           {carregando ? (
             <div style={{ padding: '40px', textAlign: 'center', color: '#4b5563' }}>Carregando...</div>
           ) : filtrados.length === 0 ? (
             <div style={{ padding: '40px', textAlign: 'center' }}>
-              <div style={{ fontSize: '36px', marginBottom: '12px' }}>🔍</div>
               <p style={{ color: '#4b5563', fontSize: '14px' }}>Nenhum orçamento encontrado.</p>
             </div>
           ) : (
@@ -295,19 +301,19 @@ export default function Orcamentos() {
                 const status = getStatusColor(o.status)
                 return (
                   <div key={o.id} className="orc-linha" onClick={() => setModalAberto(o)}
-                    style={{ padding: '14px 20px', borderBottom: '1px solid #1e2130', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', cursor: 'pointer', transition: 'background 0.15s' }}>
+                    style={{ padding: '13px 18px', borderBottom: '1px solid #1e2130', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', cursor: 'pointer', transition: 'background 0.15s' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.cliente}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-                        <span style={{ background: status.bg, color: status.text, padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{status.label}</span>
+                      <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleCase(o.cliente)}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', flexWrap: 'wrap' }}>
+                        <span style={{ background: status.bg, color: status.text, padding: '1px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{status.label}</span>
                         <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
                         <span style={{ fontSize: '11px', color: '#4b5563' }}>{formatarData(o.created_at)}</span>
-                        {o.observacoes && <span title="Tem observações" style={{ fontSize: '11px' }}>📝</span>}
-                        {o.endereco && <span title="Tem endereço" style={{ fontSize: '11px' }}>📍</span>}
-                        {o.data_agendamento && <span title="Agendado" style={{ fontSize: '11px' }}>📅</span>}
+                        {o.observacoes && <span style={{ fontSize: '11px' }}>📝</span>}
+                        {o.endereco && <span style={{ fontSize: '11px' }}>📍</span>}
+                        {o.data_agendamento && <span style={{ fontSize: '11px' }}>📅</span>}
                       </div>
                     </div>
-                    <span style={{ color: '#4b5563', fontSize: '18px' }}>›</span>
+                    <span style={{ color: '#4b5563', fontSize: '16px' }}>›</span>
                   </div>
                 )
               })}
