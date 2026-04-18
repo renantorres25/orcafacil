@@ -51,6 +51,12 @@ const Icons = {
   ),
 }
 
+// AJUSTE 1: função titleCase global
+function titleCase(str: string) {
+  if (!str) return ''
+  return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+}
+
 export function Sidebar({ ativa }: { ativa: string }) {
   const router = useRouter()
   const [usuario, setUsuario] = useState(null)
@@ -102,7 +108,7 @@ export function Sidebar({ ativa }: { ativa: string }) {
         {perfil?.nome_empresa && (
           <div style={{ marginBottom: '20px', padding: '10px 12px', background: 'rgba(99,102,241,0.08)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.15)' }}>
             <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '2px' }}>Empresa</div>
-            <div style={{ fontSize: '13px', color: '#a5b4fc', fontWeight: 600 }}>{perfil.nome_empresa}</div>
+            <div style={{ fontSize: '13px', color: '#a5b4fc', fontWeight: 600 }}>{titleCase(perfil.nome_empresa)}</div>
             {perfil.especialidade && <div style={{ fontSize: '11px', color: '#4b5563', marginTop: '2px' }}>{perfil.especialidade}</div>}
           </div>
         )}
@@ -187,7 +193,6 @@ function DashboardContent() {
     }
   }, [mostrarLink])
 
-  // Métricas
   const total = orcamentos.length
   const pendentes = orcamentos.filter(o => o.status === 'pendente').length
   const aprovados = orcamentos.filter(o => o.status === 'aprovado').length
@@ -195,7 +200,6 @@ function DashboardContent() {
   const recusados = orcamentos.filter(o => o.status === 'recusado').length
   const aReceber = orcamentos.filter(o => o.status === 'aprovado').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
   const faturado = orcamentos.filter(o => o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
-  const taxaAprovacao = total > 0 ? Math.round((aprovados + concluidos) / total * 100) : 0
 
   function copiarLink() {
     if (linkGerado) { navigator.clipboard.writeText(linkGerado); setCopiado(true); setTimeout(() => setCopiado(false), 2000) }
@@ -221,7 +225,8 @@ function DashboardContent() {
     return { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Pendente' }
   }
 
-  const nomeEmpresa = perfil?.nome_empresa || ''
+  // AJUSTE 1: titleCase no nome da empresa
+  const nomeEmpresa = titleCase(perfil?.nome_empresa || '')
 
   return (
     <div style={{ minHeight: '100vh', background: '#0f1117', fontFamily: "'DM Sans', sans-serif", color: '#f1f5f9' }}>
@@ -231,7 +236,6 @@ function DashboardContent() {
 
       <div className="main-content" style={{ marginLeft: '240px', padding: '32px 40px' }}>
 
-        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
             <h1 className="page-title" style={{ fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>Bem-vindo 👋</h1>
@@ -244,7 +248,6 @@ function DashboardContent() {
           <button className="novo-btn" onClick={() => router.push('/novo-orcamento')} style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 24px rgba(99,102,241,0.4)', fontFamily: "'DM Sans', sans-serif" }}>+ Novo</button>
         </div>
 
-        {/* Banner link gerado */}
         {mostrarLink && linkGerado && (
           <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '16px', padding: '20px', marginBottom: '24px', position: 'relative' }}>
             <button onClick={() => { setMostrarLink(false); router.replace('/dashboard') }} style={{ position: 'absolute', top: '12px', right: '16px', background: 'transparent', border: 'none', color: '#6b7280', fontSize: '20px', cursor: 'pointer' }}>×</button>
@@ -260,30 +263,34 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Cards financeiros — destaque */}
+        {/* Cards financeiros */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-          {/* A receber */}
-          <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.06))', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '16px', padding: '16px 18px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+          <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: '16px', padding: '16px 18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 500 }}>A receber</span>
-              <span style={{ fontSize: '10px', color: '#6366f1', background: 'rgba(99,102,241,0.15)', padding: '2px 8px', borderRadius: '20px', fontWeight: 600 }}>{aprovados} aprovado{aprovados !== 1 ? 's' : ''}</span>
+              <span style={{ fontSize: '10px', color: '#6366f1', background: 'rgba(99,102,241,0.15)', padding: '2px 8px', borderRadius: '20px', fontWeight: 600 }}>
+                {aprovados} aprovado{aprovados !== 1 ? 's' : ''}
+              </span>
             </div>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: '#a5b4fc', marginBottom: '4px' }}>R$ {fmt(aReceber)}</div>
-            <div style={{ fontSize: '11px', color: '#4b5563' }}>Serviços fechados, aguardando execução</div>
+            {/* AJUSTE 2: fonte menor nos valores */}
+            <div style={{ fontSize: '17px', fontWeight: 700, color: '#a5b4fc', marginBottom: '4px', letterSpacing: '-0.3px' }}>R$ {fmt(aReceber)}</div>
+            <div style={{ fontSize: '11px', color: '#4b5563', lineHeight: 1.4 }}>Fechados, aguardando execução</div>
           </div>
 
-          {/* Faturado */}
-          <div style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '16px', padding: '16px 18px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+          <div style={{ background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.18)', borderRadius: '16px', padding: '16px 18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 500 }}>Faturado</span>
-              <span style={{ fontSize: '10px', color: '#10b981', background: 'rgba(16,185,129,0.15)', padding: '2px 8px', borderRadius: '20px', fontWeight: 600 }}>{concluidos} concluído{concluidos !== 1 ? 's' : ''}</span>
+              <span style={{ fontSize: '10px', color: '#10b981', background: 'rgba(16,185,129,0.15)', padding: '2px 8px', borderRadius: '20px', fontWeight: 600 }}>
+                {concluidos} concluído{concluidos !== 1 ? 's' : ''}
+              </span>
             </div>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: '#34d399', marginBottom: '4px' }}>R$ {fmt(faturado)}</div>
-            <div style={{ fontSize: '11px', color: '#4b5563' }}>Serviços executados e finalizados</div>
+            {/* AJUSTE 2: fonte menor nos valores */}
+            <div style={{ fontSize: '17px', fontWeight: 700, color: '#34d399', marginBottom: '4px', letterSpacing: '-0.3px' }}>R$ {fmt(faturado)}</div>
+            <div style={{ fontSize: '11px', color: '#4b5563', lineHeight: 1.4 }}>Executados e finalizados</div>
           </div>
         </div>
 
-        {/* Cards de status */}
+        {/* AJUSTE 4: cards menores com emoji menor e número proporcional */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '24px' }}>
           {[
             { label: 'Total', value: total, color: '#6366f1', icon: '📋' },
@@ -291,10 +298,12 @@ function DashboardContent() {
             { label: 'Aprovados', value: aprovados, color: '#10b981', icon: '✅' },
             { label: 'Recusados', value: recusados, color: '#f87171', icon: '❌' },
           ].map((card) => (
-            <div key={card.label} style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '14px', padding: '14px' }}>
-              <div style={{ fontSize: '16px', marginBottom: '6px' }}>{card.icon}</div>
-              <div style={{ fontSize: '10px', color: '#4b5563', marginBottom: '4px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.label}</div>
-              <div style={{ fontSize: '20px', fontWeight: 700, color: card.color, fontFamily: "'Syne', sans-serif" }}>{card.value}</div>
+            <div key={card.label} style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '14px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '13px' }}>{card.icon}</span>
+                <span style={{ fontSize: '18px', fontWeight: 700, color: card.color, fontFamily: "'Syne', sans-serif" }}>{card.value}</span>
+              </div>
+              <div style={{ fontSize: '10px', color: '#4b5563', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.label}</div>
             </div>
           ))}
         </div>
@@ -309,7 +318,7 @@ function DashboardContent() {
             <div style={{ padding: '40px', textAlign: 'center', color: '#4b5563' }}>Carregando...</div>
           ) : orcamentos.length === 0 ? (
             <div style={{ padding: '40px', textAlign: 'center' }}>
-              <div style={{ fontSize: '36px', marginBottom: '12px' }}>📋</div>
+              <div style={{ fontSize: '32px', marginBottom: '12px' }}>📋</div>
               <p style={{ color: '#4b5563', fontSize: '14px' }}>Nenhum orçamento ainda.</p>
               <button onClick={() => router.push('/novo-orcamento')} style={{ marginTop: '12px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Criar orçamento</button>
             </div>
@@ -321,7 +330,8 @@ function DashboardContent() {
                 return (
                   <div key={o.id} style={{ padding: '14px 20px', borderBottom: '1px solid #1e2130', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.cliente}</div>
+                      {/* AJUSTE 3: titleCase nos nomes dos clientes */}
+                      <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleCase(o.cliente)}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                         <span style={{ background: status.bg, color: status.text, padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{status.label}</span>
                         <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
