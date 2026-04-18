@@ -57,7 +57,12 @@ export default function PaginaOrcamento({ params }) {
     </div>
   )
 
-  const nomeEmpresa = perfil?.nome_empresa || 'OrcaFácil'
+  // Capitaliza primeira letra de cada palavra
+  function capitalize(str) {
+    return str?.replace(/\b\w/g, l => l.toUpperCase()) || ''
+  }
+
+  const nomeEmpresa = capitalize(perfil?.nome_empresa || 'OrcaFácil')
   const especialidade = perfil?.especialidade || ''
   const totalFormatado = `R$ ${parseFloat(orcamento.total).toFixed(2).replace('.', ',')}`
 
@@ -71,6 +76,7 @@ export default function PaginaOrcamento({ params }) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
               <div style={{ fontSize: '11px', color: '#10b981', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>● Orçamento Profissional</div>
+              {/* AJUSTE 1: nome em capitalize, não uppercase */}
               <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: '22px', fontWeight: 800, margin: 0, color: '#0f172a' }}>{nomeEmpresa}</h1>
               {especialidade && <p style={{ fontSize: '13px', color: '#64748b', margin: '2px 0 0' }}>{especialidade}</p>}
             </div>
@@ -102,14 +108,16 @@ export default function PaginaOrcamento({ params }) {
         <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
           <div style={{ background: 'linear-gradient(135deg, #6366f1, #7c3aed)', padding: '18px 20px' }}>
             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.65)', fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: '6px' }}>Orçamento para</div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: 'white', fontFamily: "'Syne', sans-serif', marginBottom: '4px'", textTransform: 'capitalize' }}>{orcamento.cliente}</div>
+            {/* AJUSTE 1: capitalize no nome do cliente também */}
+            <div style={{ fontSize: '22px', fontWeight: 700, color: 'white', fontFamily: "'Syne', sans-serif", marginBottom: '4px' }}>{capitalize(orcamento.cliente)}</div>
             {orcamento.telefone && (
               <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>📱 {orcamento.telefone}</div>
             )}
           </div>
           <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9' }}>
             <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>Valor total</span>
-            <span style={{ fontSize: '22px', fontWeight: 800, color: '#6366f1', fontFamily: "'Syne', sans-serif" }}>{totalFormatado}</span>
+            {/* AJUSTE 2: fonte menor e sem itálico no valor */}
+            <span style={{ fontSize: '18px', fontWeight: 700, color: '#6366f1', fontFamily: "'DM Sans', sans-serif" }}>{totalFormatado}</span>
           </div>
         </div>
 
@@ -133,19 +141,20 @@ export default function PaginaOrcamento({ params }) {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#eef2ff', borderRadius: '10px', border: '1px solid #c7d2fe' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#4338ca' }}>Total do orçamento</span>
-            <span style={{ fontSize: '18px', fontWeight: 800, color: '#4338ca', fontFamily: "'Syne', sans-serif" }}>{totalFormatado}</span>
+            {/* AJUSTE 2: fonte normal sem itálico no total também */}
+            <span style={{ fontSize: '16px', fontWeight: 700, color: '#4338ca', fontFamily: "'DM Sans', sans-serif" }}>{totalFormatado}</span>
           </div>
         </div>
 
-        {/* Diferenciais */}
+        {/* AJUSTE 3: ícones menores nos diferenciais */}
         <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '16px 20px', marginBottom: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
           {[
             { icon: '✅', text: 'Serviço profissional e garantido' },
             { icon: '💬', text: 'Transparência total nos valores' },
             { icon: '⚡', text: 'Agilidade no atendimento' },
           ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: i < 2 ? '1px solid #f1f5f9' : 'none' }}>
-              <span style={{ fontSize: '14px' }}>{item.icon}</span>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderBottom: i < 2 ? '1px solid #f1f5f9' : 'none' }}>
+              <span style={{ fontSize: '13px', lineHeight: 1, flexShrink: 0 }}>{item.icon}</span>
               <span style={{ fontSize: '13px', color: '#475569', fontWeight: 500 }}>{item.text}</span>
             </div>
           ))}
