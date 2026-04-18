@@ -95,21 +95,11 @@ export function Sidebar({ ativa }: { ativa: string }) {
   return (
     <>
       <style>{globalMobileCSS}</style>
-
-      <div className="sidebar-desktop" style={{
-        position: 'fixed', left: 0, top: 0, bottom: 0, width: '240px',
-        background: '#16181f', borderRight: '1px solid #1e2130',
-        display: 'flex', flexDirection: 'column', padding: '24px 16px', zIndex: 10
-      }}>
+      <div className="sidebar-desktop" style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '240px', background: '#16181f', borderRight: '1px solid #1e2130', display: 'flex', flexDirection: 'column', padding: '24px 16px', zIndex: 10 }}>
         <div style={{ marginBottom: '32px', padding: '0 8px' }}>
-          <div style={{
-            fontFamily: "'Syne', sans-serif", fontSize: '22px', fontWeight: 800,
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>OrcaFácil</div>
+          <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '22px', fontWeight: 800, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>OrcaFácil</div>
           <div style={{ fontSize: '11px', color: '#4b5563', marginTop: '2px', letterSpacing: '0.5px' }}>PAINEL PROFISSIONAL</div>
         </div>
-
         {perfil?.nome_empresa && (
           <div style={{ marginBottom: '20px', padding: '10px 12px', background: 'rgba(99,102,241,0.08)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.15)' }}>
             <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '2px' }}>Empresa</div>
@@ -117,54 +107,31 @@ export function Sidebar({ ativa }: { ativa: string }) {
             {perfil.especialidade && <div style={{ fontSize: '11px', color: '#4b5563', marginTop: '2px' }}>{perfil.especialidade}</div>}
           </div>
         )}
-
         <nav style={{ flex: 1 }}>
           {itensSidebar.map((item) => {
             const active = ativa === item.path
             return (
-              <div key={item.key} onClick={() => router.push(item.path)} style={{
-                display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '10px 12px', borderRadius: '10px', marginBottom: '4px',
-                background: active ? 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1))' : 'transparent',
-                border: active ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',
-                color: active ? '#a5b4fc' : '#6b7280',
-                cursor: 'pointer', fontSize: '14px', fontWeight: active ? 600 : 400,
-              }}>
+              <div key={item.key} onClick={() => router.push(item.path)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', marginBottom: '4px', background: active ? 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1))' : 'transparent', border: active ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent', color: active ? '#a5b4fc' : '#6b7280', cursor: 'pointer', fontSize: '14px', fontWeight: active ? 600 : 400 }}>
                 {Icons[item.key](active)}
                 {item.label}
               </div>
             )
           })}
         </nav>
-
         <div style={{ padding: '12px', borderRadius: '12px', background: '#1e2130', border: '1px solid #2a2d3e' }}>
           <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Conta</div>
-          <div style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {usuario?.email || '...'}
-          </div>
+          <div style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{usuario?.email || '...'}</div>
           <button onClick={sair} style={{ width: '100%', padding: '8px', background: 'transparent', border: '1px solid #374151', borderRadius: '8px', color: '#6b7280', fontSize: '13px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Sair</button>
         </div>
       </div>
 
-      <div className="bottom-nav" style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: '#16181f', borderTop: '1px solid #1e2130',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-        zIndex: 100, justifyContent: 'space-around', alignItems: 'center',
-        backdropFilter: 'blur(10px)',
-      }}>
+      <div className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#16181f', borderTop: '1px solid #1e2130', paddingBottom: 'env(safe-area-inset-bottom)', zIndex: 100, justifyContent: 'space-around', alignItems: 'center', backdropFilter: 'blur(10px)' }}>
         {itens.map((item) => {
           const active = ativa === item.path
           return (
-            <div key={item.key} onClick={() => router.push(item.path)} style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
-              padding: '10px 8px', cursor: 'pointer', flex: 1,
-              borderTop: active ? '2px solid #6366f1' : '2px solid transparent',
-            }}>
+            <div key={item.key} onClick={() => router.push(item.path)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '10px 8px', cursor: 'pointer', flex: 1, borderTop: active ? '2px solid #6366f1' : '2px solid transparent' }}>
               {Icons[item.key](active)}
-              <span style={{ fontSize: '10px', fontWeight: active ? 600 : 400, color: active ? '#a5b4fc' : '#4b5563' }}>
-                {item.label}
-              </span>
+              <span style={{ fontSize: '10px', fontWeight: active ? 600 : 400, color: active ? '#a5b4fc' : '#4b5563' }}>{item.label}</span>
             </div>
           )
         })}
@@ -230,10 +197,8 @@ function DashboardContent() {
     if (!linkGerado) return
     const nomeEmpresa = perfil?.nome_empresa || 'OrcaFácil'
     const msg = `Olá, tudo bem? 👋\n\nPreparei seu orçamento com todos os detalhes do serviço solicitado.\n\n📄 Clique no link abaixo para visualizar e aprovar:\n${linkGerado}\n\n✅ Serviço profissional\n✅ Transparência nos valores\n✅ Agilidade no atendimento\n\nQualquer dúvida estou à disposição! 😊\n\n— ${nomeEmpresa}`
-
     const orcamentoAtual = orcamentos.find(o => o.id === orcamentoId)
     const telefone = orcamentoAtual?.telefone?.replace(/\D/g, '')
-
     if (telefone) {
       window.open(`https://wa.me/55${telefone}?text=${encodeURIComponent(msg)}`)
     } else {
@@ -247,6 +212,8 @@ function DashboardContent() {
     return { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Pendente' }
   }
 
+  const nomeEmpresa = perfil?.nome_empresa || ''
+
   return (
     <div style={{ minHeight: '100vh', background: '#0f1117', fontFamily: "'DM Sans', sans-serif", color: '#f1f5f9' }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
@@ -258,13 +225,13 @@ function DashboardContent() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
             <h1 className="page-title" style={{ fontFamily: "'Syne', sans-serif", fontSize: '28px', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>Bem-vindo 👋</h1>
-            <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>Gerencie seus orçamentos</p>
+            {nomeEmpresa ? (
+              <p style={{ margin: '4px 0 0', fontSize: '16px', fontWeight: 700, fontFamily: "'Syne', sans-serif", background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{nomeEmpresa}</p>
+            ) : (
+              <p style={{ color: '#6b7280', margin: '4px 0 0', fontSize: '14px' }}>Gerencie seus orçamentos</p>
+            )}
           </div>
-          <button className="novo-btn" onClick={() => router.push('/novo-orcamento')} style={{
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none',
-            padding: '12px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 600,
-            cursor: 'pointer', boxShadow: '0 4px 24px rgba(99,102,241,0.4)', fontFamily: "'DM Sans', sans-serif"
-          }}>+ Novo</button>
+          <button className="novo-btn" onClick={() => router.push('/novo-orcamento')} style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 24px rgba(99,102,241,0.4)', fontFamily: "'DM Sans', sans-serif" }}>+ Novo</button>
         </div>
 
         {mostrarLink && linkGerado && (
@@ -302,7 +269,6 @@ function DashboardContent() {
             <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#f1f5f9' }}>Orçamentos recentes</h2>
             <button onClick={() => usuario && carregarOrcamentos(usuario)} style={{ background: '#1e2130', border: '1px solid #2a2d3e', color: '#6b7280', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>↻</button>
           </div>
-
           {carregando ? (
             <div style={{ padding: '40px', textAlign: 'center', color: '#4b5563' }}>Carregando...</div>
           ) : orcamentos.length === 0 ? (
