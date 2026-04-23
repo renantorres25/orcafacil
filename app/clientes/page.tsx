@@ -69,7 +69,7 @@ export default function Clientes() {
     total: clienteSelecionado.orcamentos.length,
     fechados: clienteSelecionado.orcamentos.filter(o => o.status === 'aprovado' || o.status === 'concluido').length,
     pendentes: clienteSelecionado.orcamentos.filter(o => o.status === 'pendente').length,
-    faturado: clienteSelecionado.orcamentos.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0),
+    faturado: clienteSelecionado.orcamentos.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + o.total, 0),
   } : null
 
   return (
@@ -109,9 +109,9 @@ export default function Clientes() {
             {/* Stats compactos */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
               {[
-                { label: 'Orçamentos', value: statsCliente.total, color: '#6366f1' },
-                { label: 'Fechados', value: statsCliente.fechados, color: '#10b981' },
-                { label: 'Pendentes', value: statsCliente.pendentes, color: '#f59e0b' },
+                { label: 'Orçamentos', value: statsCliente!.total, color: '#6366f1' },
+                { label: 'Fechados', value: statsCliente!.fechados, color: '#10b981' },
+                { label: 'Pendentes', value: statsCliente!.pendentes, color: '#f59e0b' },
               ].map(s => (
                 <div key={s.label} style={{ background: '#1e2130', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
                   <div style={{ fontSize: '18px', fontWeight: 700, color: s.color, fontFamily: "'Syne', sans-serif" }}>{s.value}</div>
@@ -123,7 +123,7 @@ export default function Clientes() {
             {/* Faturado */}
             <div style={{ background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 500 }}>Total faturado com este cliente</span>
-              <span style={{ fontSize: '16px', fontWeight: 700, color: '#34d399' }}>R$ {statsCliente.faturado.toFixed(2).replace('.', ',')}</span>
+              <span style={{ fontSize: '16px', fontWeight: 700, color: '#34d399' }}>R$ {statsCliente!.faturado.toFixed(2).replace('.', ',')}</span>
             </div>
 
             {/* Ações */}

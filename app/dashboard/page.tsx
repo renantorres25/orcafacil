@@ -21,32 +21,32 @@ export const globalMobileCSS = `
 `
 
 const Icons = {
-  home: (active) => (
+  home: (active: boolean) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? '#a5b4fc' : 'none'} stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
     </svg>
   ),
-  orcamentos: (active) => (
+  orcamentos: (active: boolean) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
     </svg>
   ),
-  clientes: (active) => (
+  clientes: (active: boolean) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
     </svg>
   ),
-  agenda: (active) => (
+  agenda: (active: boolean) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
     </svg>
   ),
-  relatorios: (active) => (
+  relatorios: (active: boolean) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
     </svg>
   ),
-  perfil: (active) => (
+  perfil: (active: boolean) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#a5b4fc' : '#4b5563'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
     </svg>
@@ -119,7 +119,7 @@ export function Sidebar({ ativa }: { ativa: string }) {
             const active = ativa === item.path
             return (
               <div key={item.key} onClick={() => router.push(item.path)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px', marginBottom: '4px', background: active ? 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1))' : 'transparent', border: active ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent', color: active ? '#a5b4fc' : '#6b7280', cursor: 'pointer', fontSize: '14px', fontWeight: active ? 600 : 400 }}>
-                {Icons[item.key](active)}
+                {Icons[item.key as keyof typeof Icons](active)}
                 {item.label}
               </div>
             )
@@ -137,7 +137,7 @@ export function Sidebar({ ativa }: { ativa: string }) {
           const active = ativa === item.path
           return (
             <div key={item.key} onClick={() => router.push(item.path)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '10px 8px', cursor: 'pointer', flex: 1, borderTop: active ? '2px solid #6366f1' : '2px solid transparent' }}>
-              {Icons[item.key](active)}
+              {Icons[item.key as keyof typeof Icons](active)}
               <span style={{ fontSize: '10px', fontWeight: active ? 600 : 400, color: active ? '#a5b4fc' : '#4b5563' }}>{item.label}</span>
             </div>
           )
@@ -200,8 +200,8 @@ function DashboardContent() {
   const aprovados = orcamentos.filter(o => o.status === 'aprovado').length
   const concluidos = orcamentos.filter(o => o.status === 'concluido').length
   const recusados = orcamentos.filter(o => o.status === 'recusado').length
-  const aReceber = orcamentos.filter(o => o.status === 'aprovado').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
-  const faturado = orcamentos.filter(o => o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
+  const aReceber = orcamentos.filter(o => o.status === 'aprovado').reduce((acc, o) => acc + o.total, 0)
+  const faturado = orcamentos.filter(o => o.status === 'concluido').reduce((acc, o) => acc + o.total, 0)
 
   function copiarLink() {
     if (linkGerado) { navigator.clipboard.writeText(linkGerado); setCopiado(true); setTimeout(() => setCopiado(false), 2000) }

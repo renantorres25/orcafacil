@@ -45,8 +45,8 @@ export default function Relatorios() {
     return d.getMonth() === mesAnterior && d.getFullYear() === anoAnterior
   })
 
-  const faturadoMes = doMes.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
-  const faturadoAnterior = doMesAnterior.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
+  const faturadoMes = doMes.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + o.total, 0)
+  const faturadoAnterior = doMesAnterior.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + o.total, 0)
   const crescimento = faturadoAnterior > 0 ? ((faturadoMes - faturadoAnterior) / faturadoAnterior * 100).toFixed(1) : null
   const aprovadosMes = doMes.filter(o => o.status === 'aprovado' || o.status === 'concluido').length
   const enviadosMes = doMes.length
@@ -60,7 +60,7 @@ export default function Relatorios() {
     const fat = orcamentos.filter(o => {
       const od = new Date(o.created_at)
       return od.getMonth() === m && od.getFullYear() === a && (o.status === 'aprovado' || o.status === 'concluido')
-    }).reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
+    }).reduce((acc, o) => acc + o.total, 0)
     return { mes: meses[m].substring(0, 3), valor: fat, m, a }
   }).reverse()
 
@@ -72,7 +72,7 @@ export default function Relatorios() {
       if (!item.descricao) return
       const key = item.descricao.toLowerCase()
       if (!servicosMap.has(key)) servicosMap.set(key, { nome: item.descricao, total: 0, count: 0 })
-      servicosMap.get(key).total += parseFloat(item.valor || 0)
+      servicosMap.get(key).total += parseFloat(item.valor || '0')
       servicosMap.get(key).count++
     })
   })

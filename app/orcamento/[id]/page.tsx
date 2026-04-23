@@ -27,6 +27,7 @@ export default function PaginaOrcamento({ params }: { params: Promise<{ id: stri
   }, [id])
 
   async function aprovar() {
+    if (!orcamento) return
     await supabase.from('orcamentos').update({ status: 'aprovado' }).eq('id', id)
     setResposta('aprovado')
     const whatsapp = perfil?.telefone ? perfil.telefone.replace(/\D/g, '') : '5517991630883'
@@ -62,7 +63,7 @@ export default function PaginaOrcamento({ params }: { params: Promise<{ id: stri
     return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
   }
 
-  const nomeEmpresa = toTitleCase(perfil?.nome_empresa) || 'OrcaFácil'
+  const nomeEmpresa = toTitleCase(perfil?.nome_empresa ?? '') || 'OrcaFácil'
   const especialidade = perfil?.especialidade || ''
   const nomeCliente = toTitleCase(orcamento.cliente)
   const totalFormatado = `R$ ${orcamento.total.toFixed(2).replace('.', ',')}`
