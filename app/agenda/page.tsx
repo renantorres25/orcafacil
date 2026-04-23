@@ -3,14 +3,15 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../supabase'
 import { Sidebar } from '../dashboard/page'
+import type { Orcamento } from '../types'
 
 export default function Agenda() {
   const router = useRouter()
-  const [orcamentos, setOrcamentos] = useState([])
+  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [carregando, setCarregando] = useState(true)
   const [diaSelecionado, setDiaSelecionado] = useState(new Date())
-  const [modalAgendamento, setModalAgendamento] = useState(null)
-  const [modalDetalhes, setModalDetalhes] = useState(null)
+  const [modalAgendamento, setModalAgendamento] = useState<Orcamento | null>(null)
+  const [modalDetalhes, setModalDetalhes] = useState<Orcamento | null>(null)
   const [dataInput, setDataInput] = useState('')
   const [horaInput, setHoraInput] = useState('')
   const [salvando, setSalvando] = useState(false)
@@ -35,12 +36,12 @@ export default function Agenda() {
     setSalvando(false); setModalAgendamento(null); setDataInput(''); setHoraInput(''); carregar()
   }
 
-  async function removerAgendamento(id) {
+  async function removerAgendamento(id: string) {
     await supabase.from('orcamentos').update({ data_agendamento: null }).eq('id', id)
     setModalDetalhes(null); carregar()
   }
 
-  function getDiasDaSemana(base) {
+  function getDiasDaSemana(base: Date) {
     const inicio = new Date(base)
     const diaSemana = inicio.getDay()
     inicio.setDate(inicio.getDate() - diaSemana)
@@ -52,7 +53,7 @@ export default function Agenda() {
   const diasSemana = getDiasDaSemana(diaSelecionado)
   const diasNomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
-  function isMesmoDia(d1, d2) {
+  function isMesmoDia(d1: Date, d2: Date) {
     return d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear()
   }
 
@@ -65,15 +66,15 @@ export default function Agenda() {
     dia, count: orcamentos.filter(o => o.data_agendamento && isMesmoDia(new Date(o.data_agendamento), dia)).length
   }))
 
-  function formatarHora(dataStr) {
+  function formatarHora(dataStr: string) {
     return new Date(dataStr).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 
-  function formatarDataExtenso(d) {
+  function formatarDataExtenso(d: Date) {
     return d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
   }
 
-  function navSemana(dir) {
+  function navSemana(dir: number) {
     const nova = new Date(diaSelecionado); nova.setDate(nova.getDate() + dir * 7); setDiaSelecionado(nova)
   }
 

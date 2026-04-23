@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { supabase } from '../supabase'
+import type { User } from '@supabase/supabase-js'
+import type { Orcamento, Perfil } from '../types'
 
 export const globalMobileCSS = `
   @media (max-width: 768px) {
@@ -59,8 +61,8 @@ function titleCase(str: string) {
 
 export function Sidebar({ ativa }: { ativa: string }) {
   const router = useRouter()
-  const [usuario, setUsuario] = useState(null)
-  const [perfil, setPerfil] = useState(null)
+  const [usuario, setUsuario] = useState<User | null>(null)
+  const [perfil, setPerfil] = useState<Perfil | null>(null)
 
   useEffect(() => {
     async function carregar() {
@@ -154,14 +156,14 @@ function DashboardContent() {
   const searchParams = useSearchParams()
   const orcamentoId = searchParams.get('orcamento')
   const linkGerado = orcamentoId ? `${typeof window !== 'undefined' ? window.location.origin : ''}/orcamento/${orcamentoId}` : null
-  const [orcamentos, setOrcamentos] = useState([])
+  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [carregando, setCarregando] = useState(true)
-  const [usuario, setUsuario] = useState(null)
-  const [perfil, setPerfil] = useState(null)
+  const [usuario, setUsuario] = useState<User | null>(null)
+  const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [mostrarLink, setMostrarLink] = useState(!!orcamentoId)
   const [copiado, setCopiado] = useState(false)
 
-  async function carregarOrcamentos(user) {
+  async function carregarOrcamentos(user: User) {
     const { data } = await supabase.from('orcamentos').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
     setOrcamentos(data || [])
   }

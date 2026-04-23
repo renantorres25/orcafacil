@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../supabase'
 import { Sidebar } from '../dashboard/page'
+import type { Orcamento } from '../types'
 
-function tc(str) {
+function tc(str: string) {
   if (!str) return ''
   return str.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
@@ -15,7 +16,7 @@ function fmt(val: number) {
 
 export default function Relatorios() {
   const router = useRouter()
-  const [orcamentos, setOrcamentos] = useState([])
+  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [carregando, setCarregando] = useState(true)
   const [mesSelecionado, setMesSelecionado] = useState(new Date().getMonth())
   const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear())

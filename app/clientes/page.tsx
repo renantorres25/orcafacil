@@ -3,18 +3,19 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../supabase'
 import { Sidebar } from '../dashboard/page'
+import type { Cliente } from '../types'
 
-function tc(str) {
+function tc(str: string) {
   if (!str) return ''
   return str.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
 
 export default function Clientes() {
   const router = useRouter()
-  const [clientes, setClientes] = useState([])
+  const [clientes, setClientes] = useState<Cliente[]>([])
   const [busca, setBusca] = useState('')
   const [carregando, setCarregando] = useState(true)
-  const [clienteSelecionado, setClienteSelecionado] = useState(null)
+  const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
 
   useEffect(() => { carregar() }, [])
 
@@ -47,7 +48,7 @@ export default function Clientes() {
   const totalClientes = clientes.length
   const comServico = clientes.filter(c => c.orcamentos.some(o => o.status === 'aprovado' || o.status === 'concluido')).length
 
-  function formatarData(data) {
+  function formatarData(data: string) {
     return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
   }
 

@@ -3,23 +3,23 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../supabase'
 import { Sidebar } from '../dashboard/page'
+import type { Orcamento, Perfil } from '../types'
 
-// Função mais robusta — funciona com qualquer case
-function tc(str) {
+function tc(str: string) {
   if (!str) return ''
   return str.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
 
 export default function Orcamentos() {
   const router = useRouter()
-  const [orcamentos, setOrcamentos] = useState([])
+  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [filtro, setFiltro] = useState('todos')
   const [busca, setBusca] = useState('')
   const [carregando, setCarregando] = useState(true)
-  const [modalAberto, setModalAberto] = useState(null)
-  const [editando, setEditando] = useState(null)
+  const [modalAberto, setModalAberto] = useState<Orcamento | null>(null)
+  const [editando, setEditando] = useState<Orcamento | null>(null)
   const [salvandoEdicao, setSalvandoEdicao] = useState(false)
-  const [perfil, setPerfil] = useState(null)
+  const [perfil, setPerfil] = useState<Perfil | null>(null)
 
   useEffect(() => { carregar() }, [])
 
@@ -75,7 +75,7 @@ export default function Orcamentos() {
     return { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Pendente' }
   }
 
-  function formatarData(data) {
+  function formatarData(data: string) {
     return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
   }
 
