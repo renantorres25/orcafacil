@@ -29,7 +29,7 @@ export default function Agenda() {
   }
 
   async function salvarAgendamento() {
-    if (!dataInput || !horaInput) { alert('Preencha data e horário!'); return }
+    if (!modalAgendamento || !dataInput || !horaInput) { alert('Preencha data e horário!'); return }
     setSalvando(true)
     const dataHora = `${dataInput}T${horaInput}:00`
     await supabase.from('orcamentos').update({ data_agendamento: dataHora }).eq('id', modalAgendamento.id)
