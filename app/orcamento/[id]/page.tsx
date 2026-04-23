@@ -1,12 +1,13 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase } from '../../superbase'
+import { supabase } from '../../supabase'
 import { use } from 'react'
+import type { Orcamento, Perfil } from '../../types'
 
-export default function PaginaOrcamento({ params }) {
+export default function PaginaOrcamento({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const [orcamento, setOrcamento] = useState(null)
-  const [perfil, setPerfil] = useState(null)
+  const [orcamento, setOrcamento] = useState<Orcamento | null>(null)
+  const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [resposta, setResposta] = useState('')
 
@@ -26,11 +27,12 @@ export default function PaginaOrcamento({ params }) {
   }, [id])
 
   async function aprovar() {
+    if (!orcamento) return
     await supabase.from('orcamentos').update({ status: 'aprovado' }).eq('id', id)
     setResposta('aprovado')
     const whatsapp = perfil?.telefone ? perfil.telefone.replace(/\D/g, '') : '5517991630883'
     const numero = whatsapp.startsWith('55') ? whatsapp : `55${whatsapp}`
-    const mensagem = `✅ *Orçamento APROVADO!*\n\nOlá! Sou ${orcamento.cliente} e acabei de aprovar o orçamento.\n\n📋 *Detalhes:*\n• Cliente: ${orcamento.cliente}\n• Total: R$ ${parseFloat(orcamento.total).toFixed(2).replace('.', ',')}\n\nAguardo o contato para agendarmos o serviço! 😊`
+    const mensagem = `✅ *Orçamento APROVADO!*\n\nOlá! Sou ${orcamento.cliente} e acabei de aprovar o orçamento.\n\n📋 *Detalhes:*\n• Cliente: ${orcamento.cliente}\n• Total: R$ ${orcamento.total.toFixed(2).replace('.', ',')}\n\nAguardo o contato para agendarmos o serviço! 😊`
     window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`, '_blank')
   }
 
@@ -56,15 +58,15 @@ export default function PaginaOrcamento({ params }) {
     </div>
   )
 
-  function toTitleCase(str) {
+  function toTitleCase(str: string) {
     if (!str) return ''
     return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
   }
 
-  const nomeEmpresa = toTitleCase(perfil?.nome_empresa) || 'OrcaFácil'
+  const nomeEmpresa = toTitleCase(perfil?.nome_empresa ?? '') || 'OrcaFácil'
   const especialidade = perfil?.especialidade || ''
   const nomeCliente = toTitleCase(orcamento.cliente)
-  const totalFormatado = `R$ ${parseFloat(orcamento.total).toFixed(2).replace('.', ',')}`
+  const totalFormatado = `R$ ${orcamento.total.toFixed(2).replace('.', ',')}`
   const jaRespondido = resposta !== '' || orcamento.status !== 'pendente'
 
   return (

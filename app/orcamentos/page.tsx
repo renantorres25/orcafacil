@@ -1,25 +1,25 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../superbase'
+import { supabase } from '../supabase'
 import { Sidebar } from '../dashboard/page'
+import type { Orcamento, Perfil } from '../types'
 
-// Função mais robusta — funciona com qualquer case
-function tc(str) {
+function tc(str: string) {
   if (!str) return ''
   return str.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
 
 export default function Orcamentos() {
   const router = useRouter()
-  const [orcamentos, setOrcamentos] = useState([])
+  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [filtro, setFiltro] = useState('todos')
   const [busca, setBusca] = useState('')
   const [carregando, setCarregando] = useState(true)
-  const [modalAberto, setModalAberto] = useState(null)
-  const [editando, setEditando] = useState(null)
+  const [modalAberto, setModalAberto] = useState<Orcamento | null>(null)
+  const [editando, setEditando] = useState<Orcamento | null>(null)
   const [salvandoEdicao, setSalvandoEdicao] = useState(false)
-  const [perfil, setPerfil] = useState(null)
+  const [perfil, setPerfil] = useState<Perfil | null>(null)
 
   useEffect(() => { carregar() }, [])
 
@@ -33,13 +33,13 @@ export default function Orcamentos() {
     setCarregando(false)
   }
 
-  async function excluir(id) {
+  async function excluir(id: string) {
     if (!confirm('Tem certeza que deseja excluir este orçamento?')) return
     await supabase.from('orcamentos').delete().eq('id', id)
     setModalAberto(null); carregar()
   }
 
-  async function marcarConcluido(id) {
+  async function marcarConcluido(id: string) {
     await supabase.from('orcamentos').update({ status: 'concluido' }).eq('id', id)
     setModalAberto(null); carregar()
   }
@@ -68,23 +68,23 @@ export default function Orcamentos() {
   const recusados = orcamentos.filter(o => o.status === 'recusado').length
   const concluidos = orcamentos.filter(o => o.status === 'concluido').length
 
-  function getStatusColor(status) {
+  function getStatusColor(status: string) {
     if (status === 'aprovado') return { bg: 'rgba(16,185,129,0.15)', text: '#34d399', label: 'Aprovado' }
     if (status === 'recusado') return { bg: 'rgba(239,68,68,0.15)', text: '#f87171', label: 'Recusado' }
     if (status === 'concluido') return { bg: 'rgba(99,102,241,0.15)', text: '#a5b4fc', label: 'Concluído' }
     return { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Pendente' }
   }
 
-  function formatarData(data) {
+  function formatarData(data: string) {
     return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
   }
 
-  function copiarLink(id) {
+  function copiarLink(id: string) {
     navigator.clipboard.writeText(`${window.location.origin}/orcamento/${id}`)
     alert('Link copiado!')
   }
 
-  function enviarWhatsApp(o) {
+  function enviarWhatsApp(o: Orcamento) {
     const link = `${window.location.origin}/orcamento/${o.id}`
     const telefone = o.telefone?.replace(/\D/g, '')
     const nomeEmpresa = perfil?.nome_empresa || 'OrcaFácil'
@@ -149,7 +149,7 @@ export default function Orcamentos() {
                 </div>
                 <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13px', color: '#9ca3af' }}>Total</span>
-                  <span style={{ fontSize: '18px', fontWeight: 700, color: '#a5b4fc' }}>R$ {parseFloat(modalAberto.total).toFixed(2).replace('.', ',')}</span>
+                  <span style={{ fontSize: '18px', fontWeight: 700, color: '#a5b4fc' }}>R$ {modalAberto.total.toFixed(2).replace('.', ',')}</span>
                 </div>
                 {modalAberto.itens?.length > 0 && (
                   <div style={{ background: '#1e2130', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
@@ -310,7 +310,7 @@ export default function Orcamentos() {
                       <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tc(o.cliente)}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', flexWrap: 'wrap' }}>
                         <span style={{ background: status.bg, color: status.text, padding: '1px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{status.label}</span>
-                        <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
+                        <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {o.total.toFixed(2).replace('.', ',')}</span>
                         <span style={{ fontSize: '11px', color: '#4b5563' }}>{formatarData(o.created_at)}</span>
                         {o.observacoes && <span style={{ fontSize: '11px' }}>📝</span>}
                         {o.endereco && <span style={{ fontSize: '11px' }}>📍</span>}
