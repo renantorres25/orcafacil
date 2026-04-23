@@ -2,11 +2,12 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabase'
 import { use } from 'react'
+import type { Orcamento, Perfil } from '../../types'
 
-export default function PaginaOrcamento({ params }) {
+export default function PaginaOrcamento({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const [orcamento, setOrcamento] = useState(null)
-  const [perfil, setPerfil] = useState(null)
+  const [orcamento, setOrcamento] = useState<Orcamento | null>(null)
+  const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [resposta, setResposta] = useState('')
 
@@ -56,7 +57,7 @@ export default function PaginaOrcamento({ params }) {
     </div>
   )
 
-  function toTitleCase(str) {
+  function toTitleCase(str: string) {
     if (!str) return ''
     return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
   }

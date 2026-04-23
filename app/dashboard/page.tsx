@@ -220,7 +220,7 @@ function DashboardContent() {
     }
   }
 
-  function getStatusColor(status) {
+  function getStatusColor(status: string) {
     if (status === 'aprovado') return { bg: 'rgba(16,185,129,0.15)', text: '#34d399', label: 'Aprovado' }
     if (status === 'recusado') return { bg: 'rgba(239,68,68,0.15)', text: '#f87171', label: 'Recusado' }
     if (status === 'concluido') return { bg: 'rgba(99,102,241,0.15)', text: '#a5b4fc', label: 'Concluído' }

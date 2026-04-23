@@ -52,14 +52,14 @@ export default function Clientes() {
     return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
   }
 
-  function getStatusColor(status) {
+  function getStatusColor(status: string) {
     if (status === 'aprovado') return { bg: 'rgba(16,185,129,0.15)', text: '#34d399', label: 'Aprovado' }
     if (status === 'recusado') return { bg: 'rgba(239,68,68,0.15)', text: '#f87171', label: 'Recusado' }
     if (status === 'concluido') return { bg: 'rgba(99,102,241,0.15)', text: '#a5b4fc', label: 'Concluído' }
     return { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Pendente' }
   }
 
-  function enviarWhatsApp(telefone, nome) {
+  function enviarWhatsApp(telefone: string, nome: string) {
     const numero = telefone.replace(/\D/g, '')
     window.open(`https://wa.me/55${numero}?text=${encodeURIComponent(`Olá ${nome}! Tudo bem?`)}`)
   }

@@ -33,13 +33,13 @@ export default function Orcamentos() {
     setCarregando(false)
   }
 
-  async function excluir(id) {
+  async function excluir(id: string) {
     if (!confirm('Tem certeza que deseja excluir este orçamento?')) return
     await supabase.from('orcamentos').delete().eq('id', id)
     setModalAberto(null); carregar()
   }
 
-  async function marcarConcluido(id) {
+  async function marcarConcluido(id: string) {
     await supabase.from('orcamentos').update({ status: 'concluido' }).eq('id', id)
     setModalAberto(null); carregar()
   }
@@ -68,7 +68,7 @@ export default function Orcamentos() {
   const recusados = orcamentos.filter(o => o.status === 'recusado').length
   const concluidos = orcamentos.filter(o => o.status === 'concluido').length
 
-  function getStatusColor(status) {
+  function getStatusColor(status: string) {
     if (status === 'aprovado') return { bg: 'rgba(16,185,129,0.15)', text: '#34d399', label: 'Aprovado' }
     if (status === 'recusado') return { bg: 'rgba(239,68,68,0.15)', text: '#f87171', label: 'Recusado' }
     if (status === 'concluido') return { bg: 'rgba(99,102,241,0.15)', text: '#a5b4fc', label: 'Concluído' }
@@ -79,12 +79,12 @@ export default function Orcamentos() {
     return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
   }
 
-  function copiarLink(id) {
+  function copiarLink(id: string) {
     navigator.clipboard.writeText(`${window.location.origin}/orcamento/${id}`)
     alert('Link copiado!')
   }
 
-  function enviarWhatsApp(o) {
+  function enviarWhatsApp(o: Orcamento) {
     const link = `${window.location.origin}/orcamento/${o.id}`
     const telefone = o.telefone?.replace(/\D/g, '')
     const nomeEmpresa = perfil?.nome_empresa || 'OrcaFácil'

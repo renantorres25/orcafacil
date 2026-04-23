@@ -78,7 +78,7 @@ export default function Relatorios() {
   })
   const topServicos = Array.from(servicosMap.values()).sort((a, b) => b.total - a.total).slice(0, 5)
 
-  function navMes(dir) {
+  function navMes(dir: number) {
     let novoMes = mesSelecionado + dir
     let novoAno = anoSelecionado
     if (novoMes > 11) { novoMes = 0; novoAno++ }
