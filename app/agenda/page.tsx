@@ -58,7 +58,7 @@ export default function Agenda() {
   }
 
   const agendadosDia = orcamentos.filter(o => o.data_agendamento && isMesmoDia(new Date(o.data_agendamento), diaSelecionado))
-    .sort((a, b) => new Date(a.data_agendamento).getTime() - new Date(b.data_agendamento).getTime())
+    .sort((a, b) => new Date(a.data_agendamento!).getTime() - new Date(b.data_agendamento!).getTime())
 
   const semAgendamento = orcamentos.filter(o => !o.data_agendamento)
 
@@ -267,7 +267,7 @@ export default function Agenda() {
                       <div key={o.id} className="card-servico" onClick={() => setModalDetalhes(o)}
                         style={{ background: '#16181f', border: '1px solid #1e2130', borderRadius: '16px', padding: '16px 20px', display: 'flex', gap: '16px', alignItems: 'flex-start', borderLeft: '3px solid #6366f1', cursor: 'pointer', transition: 'all 0.15s' }}>
                         <div style={{ textAlign: 'center', minWidth: '52px' }}>
-                          <div style={{ fontSize: '18px', fontWeight: 800, color: '#a5b4fc', fontFamily: "'Syne', sans-serif" }}>{formatarHora(o.data_agendamento)}</div>
+                          <div style={{ fontSize: '18px', fontWeight: 800, color: '#a5b4fc', fontFamily: "'Syne', sans-serif" }}>{formatarHora(o.data_agendamento!)}</div>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 600, fontSize: '15px', color: '#f1f5f9', marginBottom: '4px' }}>{o.cliente}</div>
