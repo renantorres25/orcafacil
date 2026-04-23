@@ -236,7 +236,7 @@ export default function Relatorios() {
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span style={{ background: cor.bg, color: cor.text, padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{cor.label}</span>
-                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc' }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc' }}>R$ {o.total.toFixed(2).replace('.', ',')}</span>
                         </div>
                       </div>
                     )

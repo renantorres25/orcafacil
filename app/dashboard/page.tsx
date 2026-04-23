@@ -336,7 +336,7 @@ function DashboardContent() {
                       <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleCase(o.cliente)}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                         <span style={{ background: status.bg, color: status.text, padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{status.label}</span>
-                        <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
+                        <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {o.total.toFixed(2).replace('.', ',')}</span>
                       </div>
                     </div>
                     <button onClick={() => { navigator.clipboard.writeText(link); alert('Link copiado!') }} style={{ background: '#1e2130', border: '1px solid #2a2d3e', color: '#9ca3af', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0 }}>🔗</button>

@@ -154,7 +154,7 @@ export default function Clientes() {
                       <div style={{ fontSize: '11px', color: '#4b5563' }}>{formatarData(o.created_at)}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc', marginBottom: '3px' }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc', marginBottom: '3px' }}>R$ {o.total.toFixed(2).replace('.', ',')}</div>
                       <span style={{ background: status.bg, color: status.text, padding: '1px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: 600 }}>{status.label}</span>
                     </div>
                   </div>

@@ -149,7 +149,7 @@ export default function Orcamentos() {
                 </div>
                 <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13px', color: '#9ca3af' }}>Total</span>
-                  <span style={{ fontSize: '18px', fontWeight: 700, color: '#a5b4fc' }}>R$ {parseFloat(modalAberto.total).toFixed(2).replace('.', ',')}</span>
+                  <span style={{ fontSize: '18px', fontWeight: 700, color: '#a5b4fc' }}>R$ {modalAberto.total.toFixed(2).replace('.', ',')}</span>
                 </div>
                 {modalAberto.itens?.length > 0 && (
                   <div style={{ background: '#1e2130', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px' }}>
@@ -310,7 +310,7 @@ export default function Orcamentos() {
                       <div style={{ fontWeight: 500, fontSize: '14px', color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tc(o.cliente)}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', flexWrap: 'wrap' }}>
                         <span style={{ background: status.bg, color: status.text, padding: '1px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{status.label}</span>
-                        <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
+                        <span style={{ fontSize: '12px', color: '#a5b4fc', fontWeight: 600 }}>R$ {o.total.toFixed(2).replace('.', ',')}</span>
                         <span style={{ fontSize: '11px', color: '#4b5563' }}>{formatarData(o.created_at)}</span>
                         {o.observacoes && <span style={{ fontSize: '11px' }}>📝</span>}
                         {o.endereco && <span style={{ fontSize: '11px' }}>📍</span>}

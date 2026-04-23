@@ -122,7 +122,7 @@ export default function Agenda() {
             {/* Total */}
             <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.05))', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '13px', color: '#9ca3af' }}>Total</span>
-              <span style={{ fontSize: '20px', fontWeight: 800, color: '#a5b4fc', fontFamily: "'Syne', sans-serif" }}>R$ {parseFloat(modalDetalhes.total).toFixed(2).replace('.', ',')}</span>
+              <span style={{ fontSize: '20px', fontWeight: 800, color: '#a5b4fc', fontFamily: "'Syne', sans-serif" }}>R$ {modalDetalhes.total.toFixed(2).replace('.', ',')}</span>
             </div>
 
             {/* Itens */}
@@ -196,7 +196,7 @@ export default function Agenda() {
             onClick={e => e.stopPropagation()}>
             <div style={{ width: '40px', height: '4px', background: '#2a2d3e', borderRadius: '2px', margin: '0 auto 20px' }} />
             <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: '18px', fontWeight: 700, margin: '0 0 6px', color: '#f1f5f9' }}>📅 Agendar serviço</h2>
-            <p style={{ color: '#6b7280', fontSize: '13px', margin: '0 0 20px' }}>Cliente: <strong style={{ color: '#a5b4fc' }}>{modalAgendamento.cliente}</strong> — R$ {parseFloat(modalAgendamento.total).toFixed(2).replace('.', ',')}</p>
+            <p style={{ color: '#6b7280', fontSize: '13px', margin: '0 0 20px' }}>Cliente: <strong style={{ color: '#a5b4fc' }}>{modalAgendamento.cliente}</strong> — R$ {modalAgendamento.total.toFixed(2).replace('.', ',')}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'block' }}>Data do serviço</label>
@@ -280,7 +280,7 @@ export default function Agenda() {
                             {o.itens?.length > 2 && <span style={{ background: '#1e2130', color: '#6b7280', fontSize: '11px', padding: '3px 10px', borderRadius: '20px' }}>+{o.itens.length - 2}</span>}
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '15px', fontWeight: 700, color: '#34d399' }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
+                            <span style={{ fontSize: '15px', fontWeight: 700, color: '#34d399' }}>R$ {o.total.toFixed(2).replace('.', ',')}</span>
                             <span style={{ fontSize: '12px', color: '#4b5563' }}>Toque para detalhes ›</span>
                           </div>
                         </div>
@@ -308,7 +308,7 @@ export default function Agenda() {
                         <div style={{ fontWeight: 600, fontSize: '14px', color: '#f1f5f9', marginBottom: '4px' }}>{o.cliente}</div>
                         {o.telefone && <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '8px' }}>📱 {o.telefone}</div>}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc' }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc' }}>R$ {o.total.toFixed(2).replace('.', ',')}</span>
                           <button onClick={() => { setModalAgendamento(o); setDataInput(''); setHoraInput('') }}
                             style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
                             + Agendar

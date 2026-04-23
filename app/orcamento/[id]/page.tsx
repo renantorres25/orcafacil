@@ -30,7 +30,7 @@ export default function PaginaOrcamento({ params }) {
     setResposta('aprovado')
     const whatsapp = perfil?.telefone ? perfil.telefone.replace(/\D/g, '') : '5517991630883'
     const numero = whatsapp.startsWith('55') ? whatsapp : `55${whatsapp}`
-    const mensagem = `✅ *Orçamento APROVADO!*\n\nOlá! Sou ${orcamento.cliente} e acabei de aprovar o orçamento.\n\n📋 *Detalhes:*\n• Cliente: ${orcamento.cliente}\n• Total: R$ ${parseFloat(orcamento.total).toFixed(2).replace('.', ',')}\n\nAguardo o contato para agendarmos o serviço! 😊`
+    const mensagem = `✅ *Orçamento APROVADO!*\n\nOlá! Sou ${orcamento.cliente} e acabei de aprovar o orçamento.\n\n📋 *Detalhes:*\n• Cliente: ${orcamento.cliente}\n• Total: R$ ${orcamento.total.toFixed(2).replace('.', ',')}\n\nAguardo o contato para agendarmos o serviço! 😊`
     window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`, '_blank')
   }
 
@@ -64,7 +64,7 @@ export default function PaginaOrcamento({ params }) {
   const nomeEmpresa = toTitleCase(perfil?.nome_empresa) || 'OrcaFácil'
   const especialidade = perfil?.especialidade || ''
   const nomeCliente = toTitleCase(orcamento.cliente)
-  const totalFormatado = `R$ ${parseFloat(orcamento.total).toFixed(2).replace('.', ',')}`
+  const totalFormatado = `R$ ${orcamento.total.toFixed(2).replace('.', ',')}`
   const jaRespondido = resposta !== '' || orcamento.status !== 'pendente'
 
   return (
