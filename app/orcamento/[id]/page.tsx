@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase } from '../../superbase'
+import { supabase } from '../../supabase'
 import { use } from 'react'
 
 export default function PaginaOrcamento({ params }) {

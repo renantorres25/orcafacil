@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/app/superbase'
+import { supabase } from '@/app/supabase'
 
 export default function Confirm() {
   const router = useRouter()

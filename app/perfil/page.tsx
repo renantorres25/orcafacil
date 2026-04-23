@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../superbase'
+import { supabase } from '../supabase'
 import { Sidebar } from '../dashboard/page'
 
 export default function Perfil() {

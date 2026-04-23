@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
-import { supabase } from '../superbase'
+import { supabase } from '../supabase'
 
 export const globalMobileCSS = `
   @media (max-width: 768px) {
