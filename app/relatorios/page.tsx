@@ -1,10 +1,11 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../superbase'
+import { supabase } from '../supabase'
 import { Sidebar } from '../dashboard/page'
+import type { Orcamento } from '../types'
 
-function tc(str) {
+function tc(str: string) {
   if (!str) return ''
   return str.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
@@ -15,7 +16,7 @@ function fmt(val: number) {
 
 export default function Relatorios() {
   const router = useRouter()
-  const [orcamentos, setOrcamentos] = useState([])
+  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [carregando, setCarregando] = useState(true)
   const [mesSelecionado, setMesSelecionado] = useState(new Date().getMonth())
   const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear())
@@ -44,8 +45,8 @@ export default function Relatorios() {
     return d.getMonth() === mesAnterior && d.getFullYear() === anoAnterior
   })
 
-  const faturadoMes = doMes.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
-  const faturadoAnterior = doMesAnterior.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
+  const faturadoMes = doMes.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + o.total, 0)
+  const faturadoAnterior = doMesAnterior.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + o.total, 0)
   const crescimento = faturadoAnterior > 0 ? ((faturadoMes - faturadoAnterior) / faturadoAnterior * 100).toFixed(1) : null
   const aprovadosMes = doMes.filter(o => o.status === 'aprovado' || o.status === 'concluido').length
   const enviadosMes = doMes.length
@@ -59,7 +60,7 @@ export default function Relatorios() {
     const fat = orcamentos.filter(o => {
       const od = new Date(o.created_at)
       return od.getMonth() === m && od.getFullYear() === a && (o.status === 'aprovado' || o.status === 'concluido')
-    }).reduce((acc, o) => acc + parseFloat(o.total || 0), 0)
+    }).reduce((acc, o) => acc + o.total, 0)
     return { mes: meses[m].substring(0, 3), valor: fat, m, a }
   }).reverse()
 
@@ -71,13 +72,13 @@ export default function Relatorios() {
       if (!item.descricao) return
       const key = item.descricao.toLowerCase()
       if (!servicosMap.has(key)) servicosMap.set(key, { nome: item.descricao, total: 0, count: 0 })
-      servicosMap.get(key).total += parseFloat(item.valor || 0)
+      servicosMap.get(key).total += parseFloat(item.valor || '0')
       servicosMap.get(key).count++
     })
   })
   const topServicos = Array.from(servicosMap.values()).sort((a, b) => b.total - a.total).slice(0, 5)
 
-  function navMes(dir) {
+  function navMes(dir: number) {
     let novoMes = mesSelecionado + dir
     let novoAno = anoSelecionado
     if (novoMes > 11) { novoMes = 0; novoAno++ }
@@ -235,7 +236,7 @@ export default function Relatorios() {
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span style={{ background: cor.bg, color: cor.text, padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 600 }}>{cor.label}</span>
-                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc' }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc' }}>R$ {o.total.toFixed(2).replace('.', ',')}</span>
                         </div>
                       </div>
                     )

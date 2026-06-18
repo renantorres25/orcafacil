@@ -1,20 +1,21 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../superbase'
+import { supabase } from '../supabase'
 import { Sidebar } from '../dashboard/page'
+import type { Cliente } from '../types'
 
-function tc(str) {
+function tc(str: string) {
   if (!str) return ''
   return str.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
 
 export default function Clientes() {
   const router = useRouter()
-  const [clientes, setClientes] = useState([])
+  const [clientes, setClientes] = useState<Cliente[]>([])
   const [busca, setBusca] = useState('')
   const [carregando, setCarregando] = useState(true)
-  const [clienteSelecionado, setClienteSelecionado] = useState(null)
+  const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
 
   useEffect(() => { carregar() }, [])
 
@@ -47,18 +48,18 @@ export default function Clientes() {
   const totalClientes = clientes.length
   const comServico = clientes.filter(c => c.orcamentos.some(o => o.status === 'aprovado' || o.status === 'concluido')).length
 
-  function formatarData(data) {
+  function formatarData(data: string) {
     return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
   }
 
-  function getStatusColor(status) {
+  function getStatusColor(status: string) {
     if (status === 'aprovado') return { bg: 'rgba(16,185,129,0.15)', text: '#34d399', label: 'Aprovado' }
     if (status === 'recusado') return { bg: 'rgba(239,68,68,0.15)', text: '#f87171', label: 'Recusado' }
     if (status === 'concluido') return { bg: 'rgba(99,102,241,0.15)', text: '#a5b4fc', label: 'Concluído' }
     return { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Pendente' }
   }
 
-  function enviarWhatsApp(telefone, nome) {
+  function enviarWhatsApp(telefone: string, nome: string) {
     const numero = telefone.replace(/\D/g, '')
     window.open(`https://wa.me/55${numero}?text=${encodeURIComponent(`Olá ${nome}! Tudo bem?`)}`)
   }
@@ -68,7 +69,7 @@ export default function Clientes() {
     total: clienteSelecionado.orcamentos.length,
     fechados: clienteSelecionado.orcamentos.filter(o => o.status === 'aprovado' || o.status === 'concluido').length,
     pendentes: clienteSelecionado.orcamentos.filter(o => o.status === 'pendente').length,
-    faturado: clienteSelecionado.orcamentos.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + parseFloat(o.total || 0), 0),
+    faturado: clienteSelecionado.orcamentos.filter(o => o.status === 'aprovado' || o.status === 'concluido').reduce((acc, o) => acc + o.total, 0),
   } : null
 
   return (
@@ -108,9 +109,9 @@ export default function Clientes() {
             {/* Stats compactos */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
               {[
-                { label: 'Orçamentos', value: statsCliente.total, color: '#6366f1' },
-                { label: 'Fechados', value: statsCliente.fechados, color: '#10b981' },
-                { label: 'Pendentes', value: statsCliente.pendentes, color: '#f59e0b' },
+                { label: 'Orçamentos', value: statsCliente!.total, color: '#6366f1' },
+                { label: 'Fechados', value: statsCliente!.fechados, color: '#10b981' },
+                { label: 'Pendentes', value: statsCliente!.pendentes, color: '#f59e0b' },
               ].map(s => (
                 <div key={s.label} style={{ background: '#1e2130', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
                   <div style={{ fontSize: '18px', fontWeight: 700, color: s.color, fontFamily: "'Syne', sans-serif" }}>{s.value}</div>
@@ -122,7 +123,7 @@ export default function Clientes() {
             {/* Faturado */}
             <div style={{ background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 500 }}>Total faturado com este cliente</span>
-              <span style={{ fontSize: '16px', fontWeight: 700, color: '#34d399' }}>R$ {statsCliente.faturado.toFixed(2).replace('.', ',')}</span>
+              <span style={{ fontSize: '16px', fontWeight: 700, color: '#34d399' }}>R$ {statsCliente!.faturado.toFixed(2).replace('.', ',')}</span>
             </div>
 
             {/* Ações */}
@@ -153,7 +154,7 @@ export default function Clientes() {
                       <div style={{ fontSize: '11px', color: '#4b5563' }}>{formatarData(o.created_at)}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc', marginBottom: '3px' }}>R$ {parseFloat(o.total).toFixed(2).replace('.', ',')}</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#a5b4fc', marginBottom: '3px' }}>R$ {o.total.toFixed(2).replace('.', ',')}</div>
                       <span style={{ background: status.bg, color: status.text, padding: '1px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: 600 }}>{status.label}</span>
                     </div>
                   </div>

@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../superbase'
+import { supabase } from '../supabase'
 
 export default function Cadastro() {
   const router = useRouter()

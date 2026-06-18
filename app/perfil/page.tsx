@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../superbase'
+import { supabase } from '../supabase'
 import { Sidebar } from '../dashboard/page'
 
 export default function Perfil() {
@@ -36,6 +36,7 @@ export default function Perfil() {
   async function salvar() {
     setSalvando(true); setErro(''); setSalvo(false)
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setSalvando(false); return }
     const { error } = await supabase.from('perfis').upsert({
       user_id: user.id, nome_empresa: nomeEmpresa, especialidade, telefone, instagram, email
     }, { onConflict: 'user_id' })
